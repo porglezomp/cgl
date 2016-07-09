@@ -1,6 +1,16 @@
+use std::ops::{Index, IndexMut};
+
 /// A type representing an RGB triple
 #[derive(Debug, Default, PartialEq, Eq, Clone, Copy)]
 pub struct Color(pub u8, pub u8, pub u8);
+
+impl Color {
+    pub fn black() -> Self { Default::default() }
+    pub fn white() -> Self { Color(255, 255, 255) }
+    pub fn red()   -> Self { Color(255, 0, 0) }
+    pub fn green() -> Self { Color(0, 255, 0) }
+    pub fn blue()  -> Self { Color(0, 0, 255) }
+}
 
 /// Stores an image on the heap for drawing into
 #[derive(Clone)]
@@ -37,6 +47,23 @@ impl Image {
     }
 }
 
+impl Index<(usize, usize)> for Image {
+    type Output = Color;
+    fn index(&self, (row, col): (usize, usize)) -> &Self::Output {
+        assert!(row < self.width);
+        assert!(col < self.height);
+        &self.pixels[row * self.width + col]
+    }
+}
+
+impl IndexMut<(usize, usize)> for Image {
+    fn index_mut(&mut self, (row, col): (usize, usize)) -> &mut Self::Output {
+        assert!(row < self.width);
+        assert!(col < self.height);
+        &mut self.pixels[row* self.width + col]
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{Color, Image};
@@ -50,5 +77,19 @@ mod tests {
     #[should_panic]
     fn incorrect_pixel_size() {
         Image::with_pixels(4, 4, &[Default::default(); 4]);
+    }
+
+    #[test]
+    #[should_panic]
+    fn out_of_bounds() {
+        let im = Image::with_dimensions(4, 4);
+        im[(3, 5)];
+    }
+
+    #[test]
+    fn set_colors() {
+        let mut im = Image::with_dimensions(4, 4);
+        im[(0, 0)] = Color::white();
+        assert_eq!(im[(0, 0)], Color::white());
     }
 }
