@@ -1,14 +1,21 @@
 use std::ops::{Index, IndexMut};
 
+mod obj;
+
 /// A type representing an RGB triple
 #[derive(Debug, Default, PartialEq, Eq, Clone, Copy)]
 pub struct Color(pub u8, pub u8, pub u8);
 
 impl Color {
+    /// The color of midnight
     pub fn black() -> Self { Default::default() }
+    /// Like a beautiful dove
     pub fn white() -> Self { Color(255, 255, 255) }
+    /// BLOOD!!!!
     pub fn red()   -> Self { Color(255, 0, 0) }
+    /// Looks like plants, except way brighter
     pub fn green() -> Self { Color(0, 255, 0) }
+    /// Somewhere between the color of the ocean and the sky
     pub fn blue()  -> Self { Color(0, 0, 255) }
 }
 
