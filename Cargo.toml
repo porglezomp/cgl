@@ -1,0 +1,6 @@
+[package]
+name = "cgl"
+version = "0.1.0"
+authors = ["Caleb Jones <code@calebjones.net>"]
+
+[dependencies]
