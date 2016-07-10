@@ -1,6 +1,7 @@
 use std::ops::{Index, IndexMut};
 
 pub mod obj;
+pub mod bmp;
 
 /// A type representing an RGB triple
 #[derive(Debug, Default, PartialEq, Eq, Clone, Copy)]
@@ -87,6 +88,14 @@ impl Image {
                 y += yoff;
                 error -= dx*2;
             }
+        }
+    }
+
+    pub fn bytes(&self) -> &[u8] {
+        let start: *const Color = &self.pixels[0];
+        let start: *const u8 = start as *const u8;
+        unsafe {
+            std::slice::from_raw_parts(start, self.pixels.len() * std::mem::size_of::<Color>())
         }
     }
 }
