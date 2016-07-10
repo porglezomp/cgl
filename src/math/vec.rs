@@ -6,6 +6,9 @@ pub struct Vec2<T: Clone+Copy>(pub T, pub T);
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Vec3<T: Clone+Copy>(pub T, pub T, pub T);
 
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct Vec4<T: Clone+Copy>(pub T, pub T, pub T, pub T);
+
 impl<T> Vec3<T>
     where T: Add<Output=T> + Sub<Output=T> + Mul<Output=T> + Copy
 {
@@ -74,13 +77,7 @@ impl<T> Mul<T> for Vec3<T>
     }
 }
 
-// impl<F, I> Into<Vec3<I>> for Vec3<F>
-//     where F: Into<I>
-// {
-//     fn into(self) -> Vec3<F> {
-//         Vec3(self.0.into(), self.1.into(), self.2.into())
-//     }
-// }
+// Conversions ////////////////////////////////////////////////////////////////
 
 impl<F, I> From<Vec3<F>> for Vec2<I>
     where I: From<F> + Copy,
@@ -88,18 +85,5 @@ impl<F, I> From<Vec3<F>> for Vec2<I>
 {
     fn from(from: Vec3<F>) -> Vec2<I> {
         Vec2(from.0.into(), from.1.into())
-    }
-}
-
-pub fn barycentric((t0, t1, t2): (Vec2<isize>, Vec2<isize>, Vec2<isize>),
-               point: Vec2<isize>)
-               -> Vec3<f32>
-{
-    let u = Vec3((t2.0-t0.0) as f32, (t1.0-t0.0) as f32, (t0.0-point.0) as f32)
-        .cross(Vec3((t2.1-t0.1) as f32, (t1.1-t0.1) as f32, (t0.1-point.1) as f32));
-    if u.2.abs() < 1.0 {
-        Vec3(-1.0, 1.0, 1.0)
-    } else {
-        Vec3(1.0 - (u.0 + u.1)/u.2, u.1/u.2, u.0/u.2)
     }
 }

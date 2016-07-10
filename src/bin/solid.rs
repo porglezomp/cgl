@@ -1,9 +1,6 @@
 extern crate cgl;
 
-use cgl::{Image, Color};
-use cgl::obj::Model;
-use cgl::math::{Vec2, Vec3};
-use cgl::bmp::write_bmp;
+use cgl::{Image, Color, Model, Vec2, Vec3, write_bmp};
 
 use std::fs::File;
 use std::io::BufReader;
