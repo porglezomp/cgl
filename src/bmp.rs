@@ -1,15 +1,15 @@
-use super::Image;
+use super::{Image, Color};
 
 use std::io::{self, Write};
 
-pub fn write_bmp<W: Write>(image: &Image, writer: &mut W) -> io::Result<usize> {
+pub fn write_bmp<W: Write>(image: &Image<Color>, writer: &mut W) -> io::Result<usize> {
     let row_size = (image.width * 3 + 3) & !3;
     let row_padding = row_size - image.width * 3;
     let image_size = 54 + row_size * image.height;
     try!(writer.write(b"BM"));
     try!(writer.write(&le32(image_size as i32)));
     try!(writer.write(&[0, 0, 0, 0])); // Reserved
-    try!(writer.write(&le32(0))); // Offset to image data
+    try!(writer.write(&le32(54))); // Offset to image data
     try!(writer.write(&le32(40))); // Size of header
     try!(writer.write(&le32(image.width as i32)));
     try!(writer.write(&le32(image.height as i32)));

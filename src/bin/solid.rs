@@ -37,7 +37,7 @@ fn main() {
         image.triangle(Vec2(t0.0 as isize, -t0.1 as isize),
                        Vec2(t1.0 as isize, -t1.1 as isize),
                        Vec2(t2.0 as isize, -t2.1 as isize),
-                       Color(map(shade1 * 0.8), map(shade1), map(shade1 * 1.2)));
+                       Color::rgb(map(shade1 * 0.8), map(shade1), map(shade1 * 1.2)));
     }
 
     let mut img_out = File::create("demo2.bmp").expect("should create demo.bmp");
