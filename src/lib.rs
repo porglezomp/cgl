@@ -4,7 +4,7 @@ pub mod obj;
 pub mod bmp;
 pub mod math;
 
-use math::Vec2;
+use math::{Vec2, barycentric};
 
 /// A type representing an RGB triple
 #[derive(Debug, Default, PartialEq, Eq, Clone, Copy)]
@@ -103,69 +103,21 @@ impl Image {
         }
     }
 
-    pub fn triangle(&mut self, mut t0: Vec2<isize>, mut t1: Vec2<isize>,
-                    mut t2: Vec2<isize>, color: Color)
+    pub fn triangle(&mut self, t0: Vec2<isize>, t1: Vec2<isize>,
+                    t2: Vec2<isize>, color: Color)
     {
-        if t0.1 > t1.1 { std::mem::swap(&mut t0, &mut t1); }
-        if t0.1 > t2.1 { std::mem::swap(&mut t0, &mut t2); }
-        if t1.1 > t2.1 { std::mem::swap(&mut t1, &mut t2); }
-
-        let long_dx = t2.0 - t0.0;
-        let long_dy = t2.1 - t0.1;
-        if long_dy == 0 { return; }
-        let long_xoff = if t2.0 > t0.0 { 1 } else { -1 };
-        let mut long_x = t0.0;
-        let mut long_err = 0;
-
-        let short_dx = (t1.0 - t0.0).abs();
-        let short_dy = t1.1 - t0.1;
-        let short_xoff = if t1.0 > t0.0 { 1 } else { -1 };
-        let mut short_x = t0.0;
-        let mut short_err = 0;
-        for y in t0.1..t1.1 {
-            if 0 <= y && y < self.height as isize {
-                let (a, b) = if short_x < long_x { (short_x, long_x) } else { (long_x, short_x) };
-                let a = std::cmp::max(a, 0);
-                let b = std::cmp::min(b, (self.width - 1) as isize);
-                for x in (a..b).chain(Some(b)) {
-                    self[(x as usize, y as usize)] = color;
+        use std::cmp::{min, max};
+        let x0 = max(min(t0.0, min(t1.0, t2.0)), 0);
+        let x1 = min(max(t0.0, max(t1.0, t2.0)), (self.width - 1) as isize);
+        let y0 = max(min(t0.1, min(t1.1, t2.1)), 0);
+        let y1 = min(max(t0.1, max(t1.1, t2.1)), (self.height - 1) as isize);
+        for x in (x0..x1).chain(Some(x1)) {
+            for y in (y0..y1).chain(Some(y1)) {
+                let bc_screen = barycentric((t0, t1, t2), Vec2(x, y));
+                if bc_screen.0 < 0.0 || bc_screen.1 < 0.0 || bc_screen.2 < 0.0 {
+                    continue;
                 }
-            }
-            long_err += long_dx;
-            while long_err >= long_dy {
-                long_x += long_xoff;
-                long_err -= long_dy;
-            }
-            short_err += short_dx;
-            while short_err >= short_dy {
-                short_x += short_xoff;
-                short_err -= short_dy;
-            }
-        }
-        let short_dx = (t2.0 - t1.0).abs();
-        let short_dy = t2.1 - t1.1;
-        if short_dy == 0 { return; }
-        let short_xoff = if t2.0 > t1.0 { 1 } else { -1 };
-        let mut short_x = t1.0;
-        let mut short_err = 0;
-        for y in (t1.1..t2.1).chain(Some(t2.1)) {
-            if 0 <= y && y < self.height as isize {
-                let (a, b) = if short_x < long_x { (short_x, long_x) } else { (long_x, short_x) };
-                let a = std::cmp::max(a, 0);
-                let b = std::cmp::min(b, (self.width - 1) as isize);
-                for x in (a..b).chain(Some(b)) {
-                    self[(x as usize, y as usize)] = color;
-                }
-            }
-            long_err += long_dx;
-            while long_err >= long_dy {
-                long_x += long_xoff;
-                long_err -= long_dy;
-            }
-            short_err += short_dx;
-            while short_err >= short_dy {
-                short_x += short_xoff;
-                short_err -= short_dy;
+                self[(x as usize, y as usize)] = color;
             }
         }
     }
