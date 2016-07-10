@@ -9,7 +9,7 @@ pub fn write_bmp<W: Write>(image: &Image, writer: &mut W) -> io::Result<usize> {
     try!(writer.write(b"BM"));
     try!(writer.write(&le32(image_size as i32)));
     try!(writer.write(&[0, 0, 0, 0])); // Reserved
-    try!(writer.write(&le32(44))); // Offset to image data
+    try!(writer.write(&le32(0))); // Offset to image data
     try!(writer.write(&le32(40))); // Size of header
     try!(writer.write(&le32(image.width as i32)));
     try!(writer.write(&le32(image.height as i32)));

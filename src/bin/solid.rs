@@ -1,40 +1,43 @@
 extern crate cgl;
-extern crate rand;
 
 use cgl::{Image, Color};
-use cgl::obj::{Model, Vertex};
-use cgl::math::Vec2;
+use cgl::obj::Model;
+use cgl::math::{Vec2, Vec3};
 use cgl::bmp::write_bmp;
 
 use std::fs::File;
 use std::io::BufReader;
-use rand::distributions::{IndependentSample, Range};
 
 fn main() {
     let file = File::open("african_head.obj").expect("should open african_head.obj");
     let model = Model::from_reader(BufReader::new(file)).expect("should load model");
     let mut image = Image::with_dimensions(512, 512);
-    let between = Range::new(0, 255);
-    let mut rng = rand::thread_rng();
 
     for tri in model.triangles {
-        let Vertex(x0, y0, _) = model.vertices[tri[0] as usize];
-        let Vertex(x1, y1, _) = model.vertices[tri[1] as usize];
-        let Vertex(x2, y2, _) = model.vertices[tri[2] as usize];
+        let t0 = model.vertices[tri[0] as usize] * 256.0 + Vec3(256.0, -256.0, 256.0);
+        let t1 = model.vertices[tri[1] as usize] * 256.0 + Vec3(256.0, -256.0, 256.0);
+        let t2 = model.vertices[tri[2] as usize] * 256.0 + Vec3(256.0, -256.0, 256.0);
 
-        let x0 = x0 * 256.0 + 256.0;
-        let y0 = -y0 * 256.0 + 256.0;
-        let t0 = Vec2(x0 as isize, y0 as isize);
-        let x1 = x1 * 256.0 + 256.0;
-        let y1 = -y1 * 256.0 + 256.0;
-        let t1 = Vec2(x1 as isize, y1 as isize);
-        let x2 = x2 * 256.0 + 256.0;
-        let y2 = -y2 * 256.0 + 256.0;
-        let t2 = Vec2(x2 as isize, y2 as isize);
+        let normal = (t1-t0).cross(t2-t0).normalized();
+        let shade1 = normal.dot(Vec3(0.0f32, 1.0, 0.5).normalized());
+        let shade2 = normal.dot(Vec3(0.0, 0.0, 1.0));
+        if shade2 < 0.0 {
+            continue;
+        }
 
-        image.triangle(t0, t1, t2, Color(between.ind_sample(&mut rng),
-                                         between.ind_sample(&mut rng),
-                                         between.ind_sample(&mut rng)));
+        fn map(col: f32) -> u8 {
+            if col < 0.0 {
+                0
+            } else if col > 1.0 {
+                255
+            } else {
+                (col * 255.0) as u8
+            }
+        }
+        image.triangle(Vec2(t0.0 as isize, -t0.1 as isize),
+                       Vec2(t1.0 as isize, -t1.1 as isize),
+                       Vec2(t2.0 as isize, -t2.1 as isize),
+                       Color(map(shade1 * 0.8), map(shade1), map(shade1 * 1.2)));
     }
 
     let mut img_out = File::create("demo2.bmp").expect("should create demo.bmp");

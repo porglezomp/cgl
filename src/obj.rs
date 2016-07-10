@@ -6,6 +6,7 @@ use std::io::{self, BufRead, BufReader};
 use std::fmt::{self, Display, Formatter};
 use std::error;
 use std::num;
+use math::{Vec2, Vec3};
 
 #[derive(Debug)]
 pub enum Error {
@@ -58,14 +59,9 @@ impl From<num::ParseIntError> for Error {
     fn from(error: num::ParseIntError) -> Self { Error::IntParse(error) }
 }
 
-#[derive(Debug, Default, PartialEq, Clone, Copy)]
-pub struct Vertex(pub f32, pub f32, pub f32);
-
-#[derive(Debug, Default, PartialEq, Clone, Copy)]
-pub struct Normal(pub f32, pub f32, pub f32);
-
-#[derive(Debug, Default, PartialEq, Clone, Copy)]
-pub struct TexCoord(pub f32, pub f32);
+pub type Vertex = Vec3<f32>;
+pub type Normal = Vec3<f32>;
+pub type TexCoord = Vec2<f32>;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Model {
@@ -97,21 +93,21 @@ impl Model {
                     if v.len() != 3 {
                         return Err(Error::ObjParse);
                     }
-                    vertices.push(Vertex(v[0], v[1], v[2]));
+                    vertices.push(Vec3(v[0], v[1], v[2]));
                 }
                 Some("vt") => {
                     let v: Vec<_> = v.filter_map(|x| x.parse().ok()).collect();
                     if v.len() < 2 || v.len() > 3 {
                         return Err(Error::ObjParse);
                     }
-                    texture.push(TexCoord(v[0], v[1]));
+                    texture.push(Vec2(v[0], v[1]));
                 }
                 Some("vn") => {
                     let v: Vec<_> = v.filter_map(|x| x.parse().ok()).collect();
                     if v.len() != 3 {
                         return Err(Error::ObjParse);
                     }
-                    normals.push(Normal(v[0], v[1], v[2]));
+                    normals.push(Vec3(v[0], v[1], v[2]));
                 }
                 Some("f") => {
                     let parts: Vec<_> = v.map(|x| x.split('/').collect::<Vec<_>>()).collect();
@@ -140,7 +136,8 @@ impl Model {
 
 #[cfg(test)]
 mod test {
-    use super::{Vertex, Model};
+    use super::Model;
+    use math::Vec3;
 
     #[test]
     fn read_vertex() {
@@ -148,8 +145,8 @@ mod test {
 v 1.0 1.0 1.0");
         assert_eq!(model.unwrap(), Model {
             vertices: vec![
-                Vertex(0.5, -0.25, 1.0),
-                Vertex(1.0, 1.0, 1.0),
+                Vec3(0.5, -0.25, 1.0),
+                Vec3(1.0, 1.0, 1.0),
             ],
             normals: Vec::new(),
             texture: Vec::new(),

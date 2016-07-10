@@ -107,10 +107,10 @@ impl Image {
                     t2: Vec2<isize>, color: Color)
     {
         use std::cmp::{min, max};
-        let x0 = max(min(t0.0, min(t1.0, t2.0)), 0);
-        let x1 = min(max(t0.0, max(t1.0, t2.0)), (self.width - 1) as isize);
-        let y0 = max(min(t0.1, min(t1.1, t2.1)), 0);
-        let y1 = min(max(t0.1, max(t1.1, t2.1)), (self.height - 1) as isize);
+        let x0 = max(0, min(min(t0.0, min(t1.0, t2.0)), (self.width - 1) as isize));
+        let x1 = max(0, min(max(t0.0, max(t1.0, t2.0)), (self.width - 1) as isize));
+        let y0 = max(0, min(min(t0.1, min(t1.1, t2.1)), (self.height - 1) as isize));
+        let y1 = max(0, min(max(t0.1, max(t1.1, t2.1)), (self.height - 1) as isize));
         for x in (x0..x1).chain(Some(x1)) {
             for y in (y0..y1).chain(Some(y1)) {
                 let bc_screen = barycentric((t0, t1, t2), Vec2(x, y));
