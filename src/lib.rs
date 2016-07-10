@@ -1,6 +1,6 @@
 use std::ops::{Index, IndexMut};
 
-mod obj;
+pub mod obj;
 
 /// A type representing an RGB triple
 #[derive(Debug, Default, PartialEq, Eq, Clone, Copy)]
