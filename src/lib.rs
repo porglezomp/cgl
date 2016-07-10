@@ -2,6 +2,9 @@ use std::ops::{Index, IndexMut};
 
 pub mod obj;
 pub mod bmp;
+pub mod math;
+
+use math::Vec2;
 
 /// A type representing an RGB triple
 #[derive(Debug, Default, PartialEq, Eq, Clone, Copy)]
@@ -54,6 +57,15 @@ impl Image {
         }
     }
 
+    /// A view of the image data as bytes
+    pub fn bytes(&self) -> &[u8] {
+        let start: *const Color = &self.pixels[0];
+        let start: *const u8 = start as *const u8;
+        unsafe {
+            std::slice::from_raw_parts(start, self.pixels.len() * std::mem::size_of::<Color>())
+        }
+    }
+
     /// Draw a line into the image using Bresenham's Line Drawing Algorithm
     pub fn line(&mut self, mut x0: isize, mut y0: isize,
                 mut x1: isize, mut y1: isize, color: Color)
@@ -91,11 +103,70 @@ impl Image {
         }
     }
 
-    pub fn bytes(&self) -> &[u8] {
-        let start: *const Color = &self.pixels[0];
-        let start: *const u8 = start as *const u8;
-        unsafe {
-            std::slice::from_raw_parts(start, self.pixels.len() * std::mem::size_of::<Color>())
+    pub fn triangle(&mut self, mut t0: Vec2<isize>, mut t1: Vec2<isize>,
+                    mut t2: Vec2<isize>, color: Color)
+    {
+        if t0.1 > t1.1 { std::mem::swap(&mut t0, &mut t1); }
+        if t0.1 > t2.1 { std::mem::swap(&mut t0, &mut t2); }
+        if t1.1 > t2.1 { std::mem::swap(&mut t1, &mut t2); }
+
+        let long_dx = t2.0 - t0.0;
+        let long_dy = t2.1 - t0.1;
+        if long_dy == 0 { return; }
+        let long_xoff = if t2.0 > t0.0 { 1 } else { -1 };
+        let mut long_x = t0.0;
+        let mut long_err = 0;
+
+        let short_dx = (t1.0 - t0.0).abs();
+        let short_dy = t1.1 - t0.1;
+        let short_xoff = if t1.0 > t0.0 { 1 } else { -1 };
+        let mut short_x = t0.0;
+        let mut short_err = 0;
+        for y in t0.1..t1.1 {
+            if 0 <= y && y < self.height as isize {
+                let (a, b) = if short_x < long_x { (short_x, long_x) } else { (long_x, short_x) };
+                let a = std::cmp::max(a, 0);
+                let b = std::cmp::min(b, (self.width - 1) as isize);
+                for x in (a..b).chain(Some(b)) {
+                    self[(x as usize, y as usize)] = color;
+                }
+            }
+            long_err += long_dx;
+            while long_err >= long_dy {
+                long_x += long_xoff;
+                long_err -= long_dy;
+            }
+            short_err += short_dx;
+            while short_err >= short_dy {
+                short_x += short_xoff;
+                short_err -= short_dy;
+            }
+        }
+        let short_dx = (t2.0 - t1.0).abs();
+        let short_dy = t2.1 - t1.1;
+        if short_dy == 0 { return; }
+        let short_xoff = if t2.0 > t1.0 { 1 } else { -1 };
+        let mut short_x = t1.0;
+        let mut short_err = 0;
+        for y in (t1.1..t2.1).chain(Some(t2.1)) {
+            if 0 <= y && y < self.height as isize {
+                let (a, b) = if short_x < long_x { (short_x, long_x) } else { (long_x, short_x) };
+                let a = std::cmp::max(a, 0);
+                let b = std::cmp::min(b, (self.width - 1) as isize);
+                for x in (a..b).chain(Some(b)) {
+                    self[(x as usize, y as usize)] = color;
+                }
+            }
+            long_err += long_dx;
+            while long_err >= long_dy {
+                long_x += long_xoff;
+                long_err -= long_dy;
+            }
+            short_err += short_dx;
+            while short_err >= short_dy {
+                short_x += short_xoff;
+                short_err -= short_dy;
+            }
         }
     }
 }
