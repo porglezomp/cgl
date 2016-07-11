@@ -1,5 +1,7 @@
-// use std::ops::{Add, Sub, Mul, Div};
+use std::ops::{Add, AddAssign, Mul, MulAssign};
 use std::ops::{Index, IndexMut};
+
+use super::Vec4;
 
 // Type Definitions ////////////////////////////////////////////////////////////
 
@@ -93,3 +95,69 @@ macro_rules! impl_indexing {
 impl_indexing!(Mat2 2);
 impl_indexing!(Mat3 3);
 impl_indexing!(Mat4 4);
+
+// Matrix Arithmetic ///////////////////////////////////////////////////////////
+
+impl<T> Mat4<T> where T: Copy {
+    fn row(&self, row: usize) -> Vec4<T> {
+        assert!(row < 4);
+        Vec4(self[(row, 0)], self[(row, 1)], self[(row, 2)], self[(row, 3)])
+    }
+
+    fn col(&self, col: usize) -> Vec4<T> {
+        assert!(col < 4);
+        let col = self.data[col];
+        Vec4(col[0], col[1], col[2], col[3])
+    }
+}
+
+impl Mul for Mat4<f32> {
+    type Output = Mat4<f32>;
+
+    fn mul(self, other: Mat4<f32>) -> Self::Output {
+        let mut out = Mat4::identity();
+        for row in 0..4 {
+            for col in 0..4 {
+                out[(row, col)] = self.row(row).dot(other.col(col));
+            }
+        }
+        out
+    }
+}
+
+impl<T> Mul<T> for Mat4<T> where T: MulAssign + Copy {
+    type Output = Mat4<T>;
+
+    fn mul(mut self, other: T) -> Self::Output {
+        for col in self.data.iter_mut() {
+            for entry in col.iter_mut() {
+                *entry *= other;
+            }
+        }
+        self
+    }
+}
+
+impl Mul<Vec4<f32>> for Mat4<f32> {
+    type Output = Vec4<f32>;
+
+    fn mul(self, other: Vec4<f32>) -> Self::Output {
+        Vec4(self.row(0).dot(other),
+             self.row(1).dot(other),
+             self.row(2).dot(other),
+             self.row(3).dot(other))
+    }
+}
+
+impl<T> Add for Mat4<T> where T: AddAssign + Copy {
+    type Output = Mat4<T>;
+
+    fn add(mut self, other: Mat4<T>) -> Self::Output {
+        for row in 0..4 {
+            for col in 0..4 {
+                self[(row, col)] += other[(row, col)]
+            }
+        }
+        self
+    }
+}
