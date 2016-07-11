@@ -23,15 +23,8 @@ fn main() {
         if normal.2 < 0.0 { continue; }
         let shade = normal.dot(Vec3(0.0f32, 1.0, 0.5).normalized());
 
-        fn map(col: f32) -> u8 {
-            match col {
-                col if col < 0.0 => 0,
-                col if col > 1.0 => 255,
-                col => (col * 255.0) as u8,
-            }
-        }
         image.triangle3(t0, t1, t2, &mut zbuf,
-                        Color::rgb(map(shade*1.2), map(shade), map(shade*0.8)));
+                        Color::float_rgb(shade*1.2, shade, shade*0.8));
     }
 
     let mut out_file = File::create("demo4.bmp")

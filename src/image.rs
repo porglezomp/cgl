@@ -24,6 +24,17 @@ impl Color {
     pub fn green() -> Self { Color::rgb(0, 255, 0) }
     /// Somewhere between the color of the ocean and the sky
     pub fn blue()  -> Self { Color::rgb(0, 0, 255) }
+
+    pub fn float_rgb(r: f32, g: f32, b: f32) -> Self {
+        fn map(col: f32) -> u8 {
+            match col {
+                col if col < 0.0 => 0,
+                col if col > 1.0 => 255,
+                col => (col * 255.0) as u8,
+            }
+        }
+        Color::rgb(map(r), map(g), map(b))
+    }
 }
 
 /// Stores an image on the heap for drawing into

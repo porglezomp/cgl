@@ -5,19 +5,19 @@ use super::Vec4;
 
 // Type Definitions ////////////////////////////////////////////////////////////
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Default)]
 pub struct Mat2<T: Copy> {
-    data: [[T; 2]; 2]
+    cols: [[T; 2]; 2]
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Default)]
 pub struct Mat3<T: Copy> {
-    data: [[T; 3]; 3]
+    cols: [[T; 3]; 3]
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Default)]
 pub struct Mat4<T: Copy> {
-    data: [[T; 4]; 4]
+    cols: [[T; 4]; 4]
 }
 
 // Constructors ////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ impl<T> Mat2<T> where T: Default + Copy {
     pub fn diagnonal(i: T) -> Self {
         let o = Default::default();
         Mat2 {
-            data: [[i, o],
+            cols: [[i, o],
                    [o, i]]
         }
     }
@@ -36,7 +36,7 @@ impl<T> Mat3<T> where T: Default + Copy {
     pub fn diagonal(i: T) -> Self {
         let o = Default::default();
         Mat3 {
-            data: [[i, o, o],
+            cols: [[i, o, o],
                    [o, i, o],
                    [o, o, i]]
         }
@@ -47,8 +47,8 @@ impl<T> Mat4<T> where T: Default + Copy {
     pub fn diagonal(i: T) -> Self {
         let o = Default::default();
         Mat4 {
-            data: [[i, o, o, o],
-                   [o, i, o, i],
+            cols: [[i, o, o, o],
+                   [o, i, o, o],
                    [o, o, i, o],
                    [o, o, o, i]]
         }
@@ -78,7 +78,7 @@ macro_rules! impl_indexing {
             fn index(&self, (row, col): (usize, usize)) -> &Self::Output {
                 assert!(row < $n);
                 assert!(col < $n);
-                &self.data[row][col]
+                &self.cols[col][row]
             }
         }
 
@@ -86,7 +86,7 @@ macro_rules! impl_indexing {
             fn index_mut(&mut self, (row, col): (usize, usize)) -> &mut Self::Output {
                 assert!(row < $n);
                 assert!(col < $n);
-                &mut self.data[row][col]
+                &mut self.cols[col][row]
             }
         }
     }
@@ -99,14 +99,14 @@ impl_indexing!(Mat4 4);
 // Matrix Arithmetic ///////////////////////////////////////////////////////////
 
 impl<T> Mat4<T> where T: Copy {
-    fn row(&self, row: usize) -> Vec4<T> {
+    pub fn row(&self, row: usize) -> Vec4<T> {
         assert!(row < 4);
         Vec4(self[(row, 0)], self[(row, 1)], self[(row, 2)], self[(row, 3)])
     }
 
-    fn col(&self, col: usize) -> Vec4<T> {
+    pub fn col(&self, col: usize) -> Vec4<T> {
         assert!(col < 4);
-        let col = self.data[col];
+        let col = self.cols[col];
         Vec4(col[0], col[1], col[2], col[3])
     }
 }
@@ -129,7 +129,7 @@ impl<T> Mul<T> for Mat4<T> where T: MulAssign + Copy {
     type Output = Mat4<T>;
 
     fn mul(mut self, other: T) -> Self::Output {
-        for col in self.data.iter_mut() {
+        for col in self.cols.iter_mut() {
             for entry in col.iter_mut() {
                 *entry *= other;
             }

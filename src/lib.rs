@@ -48,5 +48,5 @@ pub mod image;
 
 pub use obj::Model;
 pub use bmp::write_bmp;
-pub use math::{Vec2, Vec3, Vec4};
+pub use math::{Vec2, Vec3, Vec4, Mat2, Mat3, Mat4};
 pub use image::{Image, Color};

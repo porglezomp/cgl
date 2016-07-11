@@ -159,3 +159,9 @@ impl Vec3<f64> {
     /// doing perspective transformations.
     pub fn augment(&self) -> Vec4<f64> { Vec4(self.0, self.1, self.2, 1.0) }
 }
+
+impl Vec4<f32> {
+    pub fn retro_project(&self) -> Vec3<f32> {
+        Vec3(self.0, self.1, self.2) / self.3
+    }
+}

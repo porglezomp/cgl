@@ -22,19 +22,10 @@ fn main() {
             continue;
         }
 
-        fn map(col: f32) -> u8 {
-            if col < 0.0 {
-                0
-            } else if col > 1.0 {
-                255
-            } else {
-                (col * 255.0) as u8
-            }
-        }
         image.triangle(Vec2(t0.0 as isize, -t0.1 as isize),
                        Vec2(t1.0 as isize, -t1.1 as isize),
                        Vec2(t2.0 as isize, -t2.1 as isize),
-                       Color::rgb(map(shade1 * 1.2), map(shade1), map(shade1 * 0.8)));
+                       Color::float_rgb(shade1 * 1.2, shade1, shade1 * 0.8));
     }
 
     let mut img_out = File::create("demo2.bmp").expect("should create demo.bmp");
