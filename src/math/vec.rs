@@ -133,29 +133,29 @@ impl<F, I> From<Vec4<F>> for Vec3<I>
     }
 }
 
-macro_rules! impl_extend {
+macro_rules! impl_augment {
     ($($T: ty)*) => {
         $(impl Vec3<$T> {
             /// Extend a `Vec3` into a `Vec4` with the last component a 1. This
             /// is frequently useful for matrix multiplication by a 4x4 matrix,
             /// e.g. while doing perspective transformations.
-            pub fn extend(&self) -> Vec4<$T> { Vec4(self.0, self.1, self.2, 1) }
+            pub fn augment(&self) -> Vec4<$T> { Vec4(self.0, self.1, self.2, 1) }
         })*
     }
 }
 
-impl_extend!(u8 u16 u32 u64 i8 i16 i32 i64 usize isize);
+impl_augment!(u8 u16 u32 u64 i8 i16 i32 i64 usize isize);
 
 impl Vec3<f32> {
     /// Extend a `Vec3` into a `Vec4` with the last component a 1. This is
     /// frequently useful for matrix multiplication by a 4x4 matrix, e.g. while
     /// doing perspective transformations.
-    pub fn extend(&self) -> Vec4<f32> { Vec4(self.0, self.1, self.2, 1.0) }
+    pub fn augment(&self) -> Vec4<f32> { Vec4(self.0, self.1, self.2, 1.0) }
 }
 
 impl Vec3<f64> {
     /// Extend a `Vec3` into a `Vec4` with the last component a 1. This is
     /// frequently useful for matrix multiplication by a 4x4 matrix, e.g. while
     /// doing perspective transformations.
-    pub fn extend(&self) -> Vec4<f64> { Vec4(self.0, self.1, self.2, 1.0) }
+    pub fn augment(&self) -> Vec4<f64> { Vec4(self.0, self.1, self.2, 1.0) }
 }

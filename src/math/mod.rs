@@ -1,6 +1,8 @@
 pub mod vec;
+pub mod mat;
 
 pub use self::vec::{Vec2, Vec3, Vec4};
+pub use self::mat::{Mat2, Mat3, Mat4};
 
 pub fn barycentric((t0, t1, t2): (Vec2<isize>, Vec2<isize>, Vec2<isize>),
                point: Vec2<isize>)
