@@ -76,42 +76,42 @@ impl Vec3<f64> {
 
 macro_rules! expr { ($a:expr) => ($a) }
 macro_rules! vector_op {
-    ($V:ident<$T:ident> : $Trait:ident ($name:ident) ($op:tt) {$($part:tt),*}) => {
-        impl<$T> $Trait for $V<$T> where $T: $Trait<Output=T> + Copy {
-            type Output = $V<$T>;
+    ($V:ident : $Trait:ident ($name:ident) ($op:tt) {$($part:tt),*}) => {
+        impl<T> $Trait for $V<T> where T: $Trait<Output=T> + Copy {
+            type Output = $V<T>;
 
-            fn $name(self, other: $V<$T>) -> Self::Output {
+            fn $name(self, other: $V<T>) -> Self::Output {
                 $V($(expr!(self.$part $op other.$part)),*)
             }
         }
     }
 }
 
-vector_op!(Vec2<T>: Add (add) (+) { 0, 1 });
-vector_op!(Vec2<T>: Sub (sub) (-) { 0, 1 });
-vector_op!(Vec3<T>: Add (add) (+) { 0, 1, 2 });
-vector_op!(Vec3<T>: Sub (sub) (-) { 0, 1, 2 });
-vector_op!(Vec4<T>: Add (add) (+) { 0, 1, 2, 3 });
-vector_op!(Vec4<T>: Sub (sub) (-) { 0, 1, 2, 3 });
+vector_op!(Vec2: Add (add) (+) { 0, 1 });
+vector_op!(Vec2: Sub (sub) (-) { 0, 1 });
+vector_op!(Vec3: Add (add) (+) { 0, 1, 2 });
+vector_op!(Vec3: Sub (sub) (-) { 0, 1, 2 });
+vector_op!(Vec4: Add (add) (+) { 0, 1, 2, 3 });
+vector_op!(Vec4: Sub (sub) (-) { 0, 1, 2, 3 });
 
 macro_rules! scalar_op {
-    ($V:ident<$T:ident> : $Trait:ident ($name:ident) ($op:tt) {$($part:tt),*}) => {
-        impl<$T> $Trait<$T> for $V<$T> where $T: $Trait<Output=T> + Copy {
-            type Output = $V<$T>;
+    ($V:ident : $Trait:ident ($name:ident) ($op:tt) {$($part:tt),*}) => {
+        impl<T> $Trait<T> for $V<T> where T: $Trait<Output=T> + Copy {
+            type Output = $V<T>;
 
-            fn $name(self, other: $T) -> Self::Output {
+            fn $name(self, other: T) -> Self::Output {
                 $V($(expr!(self.$part $op other)),*)
             }
         }
     }
 }
 
-scalar_op!(Vec2<T>: Mul (mul) (*) { 0, 1 });
-scalar_op!(Vec2<T>: Div (div) (/) { 0, 1 });
-scalar_op!(Vec3<T>: Mul (mul) (*) { 0, 1, 2 });
-scalar_op!(Vec3<T>: Div (div) (/) { 0, 1, 2 });
-scalar_op!(Vec4<T>: Mul (mul) (*) { 0, 1, 2, 3});
-scalar_op!(Vec4<T>: Div (div) (/) { 0, 1, 2, 3});
+scalar_op!(Vec2: Mul (mul) (*) { 0, 1 });
+scalar_op!(Vec2: Div (div) (/) { 0, 1 });
+scalar_op!(Vec3: Mul (mul) (*) { 0, 1, 2 });
+scalar_op!(Vec3: Div (div) (/) { 0, 1, 2 });
+scalar_op!(Vec4: Mul (mul) (*) { 0, 1, 2, 3});
+scalar_op!(Vec4: Div (div) (/) { 0, 1, 2, 3});
 
 // Conversions /////////////////////////////////////////////////////////////////
 
