@@ -40,7 +40,7 @@ impl Color {
 /// Stores an image on the heap for drawing into
 #[derive(Clone)]
 pub struct Image<Pix> {
-    pixels: Vec<Pix>,
+    pixels: Box<[Pix]>,
     pub width: usize,
     pub height: usize,
 }
@@ -67,7 +67,7 @@ impl<Pix> Image<Pix>
         let mut pixels = Vec::with_capacity(width * height);
         pixels.resize(width * height, fill);
         Image {
-            pixels: pixels,
+            pixels: pixels.into_boxed_slice(),
             width: width,
             height: height,
         }
@@ -81,7 +81,7 @@ impl<Pix> Image<Pix>
     pub fn with_pixels(width: usize, height: usize, pixels: &[Pix]) -> Self {
         assert_eq!(pixels.len(), width * height);
         Image {
-            pixels: Vec::from(pixels),
+            pixels: Vec::from(pixels).into_boxed_slice(),
             width: width,
             height: height,
         }
@@ -89,10 +89,17 @@ impl<Pix> Image<Pix>
 
     /// A view of the image data as bytes
     pub fn bytes(&self) -> &[u8] {
-        let start: *const Pix = &self.pixels[0];
-        let start: *const u8 = start as *const u8;
+        let start = &self.pixels[0] as *const _ as *const u8;
         unsafe {
             std::slice::from_raw_parts(start, self.pixels.len() * std::mem::size_of::<Pix>())
+        }
+    }
+
+    /// A mutable view of the image data as bytes
+    pub fn bytes_mut(&mut self) -> &mut [u8] {
+        let start = &mut self.pixels[0] as *mut _ as *mut u8;
+        unsafe {
+            std::slice::from_raw_parts_mut(start, self.pixels.len() * std::mem::size_of::<Pix>())
         }
     }
 
