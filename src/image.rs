@@ -60,6 +60,7 @@ impl<Pix> Image<Pix>
     /// # Examples
     ///
     /// ```rust
+    /// # use cgl::Image;
     /// let mut zbuf = Image::filled(512, 512, std::f32::MIN);
     /// ```
     pub fn filled(width: usize, height: usize, fill: Pix) -> Self {

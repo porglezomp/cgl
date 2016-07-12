@@ -1,7 +1,7 @@
 use std::ops::{Add, AddAssign, Mul, MulAssign};
 use std::ops::{Index, IndexMut};
 
-use super::Vec4;
+use super::{Vec3, Vec4};
 
 // Type Definitions ////////////////////////////////////////////////////////////
 
@@ -66,6 +66,54 @@ impl Mat3<f32> {
 
 impl Mat4<f32> {
     pub fn identity() -> Self { Mat4::diagonal(1.0) }
+
+    pub fn perspective(c: f32) -> Self {
+        let mut p = Mat4::identity();
+        p[(3, 2)] = -1.0 / c;
+        p
+    }
+
+    pub fn lookat(eye: Vec3<f32>, center: Vec3<f32>, up: Vec3<f32>) -> Self {
+        let z = (center-eye).normalized();
+        let x = up.cross(z).normalized();
+        let y = z.cross(x).normalized();
+        let mut minv = Mat4::identity();
+        let mut tr = Mat4::identity();
+        for i in 0..3 {
+            minv[(0, i)] = x[i];
+            minv[(1, i)] = y[i];
+            minv[(2, i)] = z[i];
+            tr[(i, 3)] = -center[i];
+        }
+        minv * tr
+    }
+
+    pub fn viewport(w: i32, h: i32) -> Self {
+        let mut m = Mat4::identity();
+        let depth = 256.0;
+
+        m[(0, 3)] = w as f32 / 2.0;
+        m[(1, 3)] = h as f32 / 2.0;
+        m[(2, 3)] = depth / 2.0;
+
+        m[(0, 0)] = w as f32 / 2.0;
+        m[(1, 1)] = -h as f32 / 2.0;
+        m[(2, 2)] = depth / 2.0;
+
+        m
+    }
+
+    pub fn translate(offset: Vec3<f32>) -> Self {
+        let mut m = Mat4::identity();
+        for i in 0..3 { m[(0, i)] = offset[i]; }
+        m
+    }
+
+    pub fn scale(factor: Vec3<f32>) -> Self {
+        let mut m = Mat4::identity();
+        for i in 0..3 { m[(i, i)] = factor[i]; }
+        m
+    }
 }
 
 // Indexing ////////////////////////////////////////////////////////////////////

@@ -6,7 +6,7 @@ use std::io::{self, BufRead, BufReader};
 use std::fmt::{self, Display, Formatter};
 use std::error;
 use std::num;
-use math::{Vec2, Vec3};
+use math::{Vec2, Vec3, Mat4};
 
 #[derive(Debug)]
 pub enum Error {
@@ -131,6 +131,14 @@ impl Model {
             texture: texture,
             triangles: triangles,
         })
+    }
+
+    pub fn transform(&self, matrix: Mat4<f32>) -> (Vec<Vec3<isize>>, &Vec<[u32; 3]>) {
+        let vertices = self.vertices.iter().map(|v| {
+            let w = (matrix * v.augment()).retro_project();
+            Vec3(w.0 as isize, w.1 as isize, w.2 as isize)
+        }).collect();
+        (vertices, &self.triangles)
     }
 }
 

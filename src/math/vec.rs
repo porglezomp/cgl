@@ -1,4 +1,5 @@
 use std::ops::{Add, Sub, Mul, Div};
+use std::ops::{Index, IndexMut};
 
 // Type Definitions ////////////////////////////////////////////////////////////
 
@@ -10,6 +11,37 @@ pub struct Vec3<T: Clone+Copy>(pub T, pub T, pub T);
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Vec4<T: Clone+Copy>(pub T, pub T, pub T, pub T);
+
+// Indexing ////////////////////////////////////////////////////////////////////
+
+macro_rules! expr { ($a:expr) => ($a) }
+macro_rules! impl_indexing {
+    ($V:ident : $($x:tt),*) => {
+        impl<T> Index<usize> for $V<T> where T: Copy {
+            type Output = T;
+
+            fn index(&self, idx: usize) -> &Self::Output {
+                match idx {
+                    $(expr!($x) => expr!(&self.$x)),*,
+                    x => panic!("{}[{}] out of bounds", stringify!($V), x),
+                }
+            }
+        }
+
+        impl<T> IndexMut<usize> for $V<T> where T: Copy {
+            fn index_mut(&mut self, idx: usize) -> &mut Self::Output {
+                match idx {
+                    $(expr!($x) => expr!(&mut self.$x)),*,
+                    x => panic!("{}[{}] out of bounds", stringify!($V), x),
+                }
+            }
+        }
+    }
+}
+
+impl_indexing!(Vec2: 0, 1);
+impl_indexing!(Vec3: 0, 1, 2);
+impl_indexing!(Vec4: 0, 1, 2, 3);
 
 // Dot-product Etc. ////////////////////////////////////////////////////////////
 
@@ -74,7 +106,6 @@ impl Vec3<f64> {
 
 // Vector Arithmetic ///////////////////////////////////////////////////////////
 
-macro_rules! expr { ($a:expr) => ($a) }
 macro_rules! vector_op {
     ($V:ident : $Trait:ident ($name:ident) ($op:tt) {$($part:tt),*}) => {
         impl<T> $Trait for $V<T> where T: $Trait<Output=T> + Copy {
