@@ -33,21 +33,22 @@
 //! ```rust,no_run
 //! use std::fs::File;
 //! use std::io::BufReader;
-//! use cgl::obj::Model;
+//! use cgl::obj::Obj;
 //!
 //! let model_file = File::open("suzanne.obj").unwrap();
-//! let model = Model::from_reader(BufReader::new(model_file)).unwrap();
+//! let model = Obj::from_reader(BufReader::new(model_file)).unwrap();
 //! ```
 //!
 //! [`obj`]: obj/index.html
 
 pub mod obj;
+pub mod model;
 pub mod bmp;
 pub mod math;
 pub mod image;
 pub mod renderer;
 
-pub use obj::Model;
+pub use obj::Obj;
 pub use bmp::write_bmp;
 pub use math::{Vec2, Vec3, Vec4, Mat2, Mat3, Mat4};
 pub use image::{Image, Color};

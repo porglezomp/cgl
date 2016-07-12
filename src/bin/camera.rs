@@ -1,6 +1,6 @@
 extern crate cgl;
 
-use cgl::{Color, Model, Mat4, Renderer, Vec3, write_bmp};
+use cgl::{Color, Obj, Mat4, Renderer, Vec3, write_bmp};
 
 use std::fs::File;
 use std::io::BufReader;
@@ -8,7 +8,7 @@ use std::io::BufReader;
 fn main() {
     let model_file = File::open("african_head.obj")
         .expect("Should open african_head.obj");
-    let model = Model::from_reader(BufReader::new(model_file))
+    let model = Obj::from_reader(BufReader::new(model_file))
         .expect("Should parse model");
 
     let mut renderer = Renderer::with_dimensions(512, 512);
