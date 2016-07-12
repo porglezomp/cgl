@@ -44,7 +44,10 @@ pub fn read_bmp<R: Read>(reader: &mut R) -> io::Result<Image<Color>> {
                                   "The magic number should be BM"));
     }
     let width = read_le32(&header[18..22]) as usize;
-    let height = read_le32(&header[22..26]) as usize;
+    let (height, inverted) = {
+        let height = read_le32(&header[22..26]);
+        (height.abs() as usize, height < 0)
+    };
     let bpp = read_le16(&header[28..30]);
     if bpp != BPP {
         return Err(io::Error::new(io::ErrorKind::Other,
@@ -54,9 +57,16 @@ pub fn read_bmp<R: Read>(reader: &mut R) -> io::Result<Image<Color>> {
     let mut image_buf = vec![0; row_width * height];
     try!(reader.read_exact(&mut image_buf));
     let mut image = Image::with_dimensions(width, height);
-    for (source, mut dest) in image_buf.chunks(row_width).rev()
-            .zip(image.bytes_mut().chunks_mut(width * 3)) {
-        dest.copy_from_slice(&source[..width * 3]);
+    if inverted {
+        for (source, mut dest) in image_buf.chunks(row_width)
+                .zip(image.bytes_mut().chunks_mut(width * 3)) {
+            dest.copy_from_slice(&source[..width * 3]);
+        }
+    } else {
+        for (source, mut dest) in image_buf.chunks(row_width).rev()
+                .zip(image.bytes_mut().chunks_mut(width * 3)) {
+            dest.copy_from_slice(&source[..width * 3]);
+        }
     }
     Ok(image)
 }
