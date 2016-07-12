@@ -47,9 +47,12 @@ pub mod bmp;
 pub mod math;
 pub mod image;
 pub mod renderer;
+pub mod shader;
 
 pub use obj::Obj;
+pub use model::{Model, Vertex, Vert};
 pub use bmp::write_bmp;
 pub use math::{Vec2, Vec3, Vec4, Mat2, Mat3, Mat4};
 pub use image::{Image, Color};
 pub use renderer::Renderer;
+pub use shader::Shader;
