@@ -4,11 +4,14 @@
 
 use std::io::{self, BufRead, BufReader};
 use std::fmt::{self, Display, Formatter};
+use std::collections::HashMap;
 use std::fs::File;
 use std::path::Path;
 use std::convert::AsRef;
 use std::error;
 use std::num;
+
+use model::{Model, Vert};
 use math::{Vec2, Vec3, Mat4};
 
 #[derive(Debug)]
@@ -147,13 +150,45 @@ impl Obj {
                 Some(_) => return Err(Error::ObjParse(line_num)),
             }
         }
-        println!("{:?}", components);
         Ok(Obj {
             vertices: vertices,
             normals: normals,
             texture: texture,
             triangles: triangles,
             components: components,
+        })
+    }
+
+    pub fn model(&self) -> Result<Model<Vert>, ()> {
+        let mut unique_vert = HashMap::new();
+        let mut vertices = Vec::new();
+        let mut triangles = Vec::with_capacity(self.triangles.len());
+        for face in &self.components {
+            if face.len() > 3 { return Err(()); }
+            for index_set in face {
+                if !unique_vert.contains_key(index_set) {
+                    let vert = Vert {
+                        pos: self.vertices[index_set.vertex as usize],
+                        tex: match index_set.texture {
+                            Some(idx) => self.texture[idx as usize],
+                            None => Vec2(0.0, 0.0),
+                        },
+                        norm: match index_set.normal {
+                            Some(idx) => self.normals[idx as usize],
+                            None => Vec3(0.0, 0.0, 0.0),
+                        },
+                    };
+                    unique_vert.insert(index_set, vertices.len());
+                    vertices.push(vert);
+                }
+            }
+            triangles.push([unique_vert[&face[0]],
+                            unique_vert[&face[1]],
+                            unique_vert[&face[2]]]);
+        }
+        Ok(Model {
+            vertices: vertices,
+            triangles: triangles,
         })
     }
 
@@ -261,7 +296,8 @@ mod test {
 
     #[test]
     fn read_vertex() {
-        let model = Obj::from_str("v 0.5 -0.25 1.0
+        let model = Obj::from_str(
+"v 0.5 -0.25 1.0
 v 1.0 1.0 1.0");
         assert_eq!(model.unwrap(), Obj {
             vertices: vec![
