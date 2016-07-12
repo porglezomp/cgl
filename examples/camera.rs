@@ -6,8 +6,8 @@ use std::fs::File;
 use std::io::BufReader;
 
 fn main() {
-    let model_file = File::open("african_head.obj")
-        .expect("Should open african_head.obj");
+    let model_file = File::open("assets/african_head/african_head.obj")
+        .expect("Should open assets/african_head/african_head.obj");
     let model = Obj::from_reader(BufReader::new(model_file))
         .expect("Should parse model");
 
@@ -38,8 +38,8 @@ fn main() {
         renderer.triangle(t0, t1, t2, Color::float_rgb(c * 1.2, c, c * 0.8));
     }
 
-    let mut out_file = File::create("demo6.bmp")
-        .expect("Should create demo6.bmp");
+    let mut out_file = File::create("demo/demo6.bmp")
+        .expect("Should create demo/demo6.bmp");
     write_bmp(renderer.image(), &mut out_file)
         .expect("Should save image");
 }

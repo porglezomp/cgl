@@ -33,7 +33,7 @@
 //! ```rust,no_run
 //! use std::fs::File;
 //! use std::io::BufReader;
-//! use cgl::obj::Obj;
+//! use self::cgl::Obj;
 //!
 //! let model_file = File::open("suzanne.obj").unwrap();
 //! let model = Obj::from_reader(BufReader::new(model_file)).unwrap();

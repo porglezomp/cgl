@@ -6,8 +6,8 @@ use std::io::BufReader;
 use cgl::{Color, Image, Obj, Mat4, Vec3, write_bmp};
 
 fn main() {
-    let model_file = File::open("african_head.obj")
-        .expect("Should open african_head.obj");
+    let model_file = File::open("assets/african_head/african_head.obj")
+        .expect("Should open assets/african_head/african_head.obj");
     let model = Obj::from_reader(BufReader::new(model_file))
         .expect("Should parse model");
 
@@ -36,8 +36,8 @@ fn main() {
                         Color::float_rgb(shade * 1.2, shade, shade * 0.8));
     }
 
-    let mut out_file = File::create("demo5.bmp")
-        .expect("Should create demo5.bmp");
+    let mut out_file = File::create("demo/demo5.bmp")
+        .expect("Should create demo/demo5.bmp");
     write_bmp(&image, &mut out_file)
         .expect("Should save image");
 }

@@ -6,8 +6,10 @@ use std::fs::File;
 use std::io::BufReader;
 
 fn main() {
-    let file = File::open("african_head.obj").expect("should open african_head.obj");
-    let model = Obj::from_reader(BufReader::new(file)).expect("should load model");
+    let file = File::open("assets/african_head/african_head.obj")
+        .expect("should open assets/african_head/african_head.obj");
+    let model = Obj::from_reader(BufReader::new(file))
+        .expect("should load model");
     let mut image = Image::with_dimensions(512, 512);
 
     for tri in model.triangles {
@@ -20,6 +22,8 @@ fn main() {
         image.line(t2.0 as isize, t2.1 as isize, t0.0 as isize, t0.1 as isize, Color::white());
     }
 
-    let mut img_out = File::create("demo.bmp").expect("should create demo.bmp");
-    write_bmp(&image, &mut img_out).expect("should save image");
+    let mut img_out = File::create("demo/demo.bmp")
+        .expect("should create demo.bmp");
+    write_bmp(&image, &mut img_out)
+        .expect("should save image");
 }

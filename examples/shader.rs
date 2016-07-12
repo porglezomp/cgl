@@ -4,8 +4,8 @@ use cgl::{Color, Mat4, Obj, Renderer, Shader, Vec3, Vert, write_bmp};
 use std::fs::File;
 
 fn main() {
-    let model = Obj::from_file("african_head.obj")
-        .expect("Should parse african_head.obj")
+    let model = Obj::from_file("assets/african_head/african_head.obj")
+        .expect("Should parse assets/african_head/african_head.obj")
         .model()
         .expect("Should convert correctly");
 
@@ -24,8 +24,8 @@ fn main() {
     let shader = DiffuseShader::default();
     renderer.model(&shader, &matrix, &model);
 
-    let mut out_file = File::create("demo7.bmp")
-        .expect("Should create file demo7.bmp");
+    let mut out_file = File::create("demo/demo7.bmp")
+        .expect("Should create file demo/demo7.bmp");
     write_bmp(renderer.image(), &mut out_file)
         .expect("Should save image");
 }

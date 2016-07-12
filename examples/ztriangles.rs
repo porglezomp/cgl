@@ -24,6 +24,8 @@ fn main() {
                     Vec3(-0.5, -0.7, 0.4), &mut zbuf, Color::green());
 
     // Save the image to an output file
-    let mut output = File::create("demo3.bmp").expect("Should create demo3.bmp");
-    write_bmp(&image, &mut output).expect("Should save image");
+    let mut output = File::create("demo/demo3.bmp")
+        .expect("Should create demo3.bmp");
+    write_bmp(&image, &mut output)
+        .expect("Should save image");
 }
