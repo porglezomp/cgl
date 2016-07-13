@@ -51,16 +51,17 @@ impl Renderer {
         where V: Vertex + ::std::fmt::Debug, S: Shader<V, U>, <S as Shader<V, U>>::VOut: ::std::fmt::Debug
     {
         macro_rules! apply_vertex {
-            ($vin:ident => $t:ident $v:ident) => {
+            ($vin:ident => $t:ident $v:ident $w:ident) => {
                 let mut t = Vec4::default();
                 let $v = shader.vertex($vin, uniform, &mut t);
                 let t0 = t.retro_project();
                 let $t = Vec3(t0.0 as isize, t0.1 as isize, t0.2 as isize);
+                let $w = t.3;
             }
         }
-        apply_vertex!(t0 => t0 v0);
-        apply_vertex!(t1 => t1 v1);
-        apply_vertex!(t2 => t2 v2);
+        apply_vertex!(t0 => t0 v0 w0);
+        apply_vertex!(t1 => t1 v1 w1);
+        apply_vertex!(t2 => t2 v2 w2);
         let ((x0, y0), (x1, y1)) = self.clip(t0, t1, t2);
 
         for x in (x0..x1).chain(Some(x1)) {
@@ -71,11 +72,13 @@ impl Renderer {
                     continue;
                 }
 
-                let z = t0.2 as f32 * bc_screen.0 +
-                    t1.2 as f32 * bc_screen.1 +
-                    t2.2 as f32 * bc_screen.2;
+                let w_point = 1.0 / bc_screen.dot(Vec3(1.0/w0, 1.0/w1, 1.0/w2));
+                let bc_clip = bc_screen / Vec3(w0, w1, w2) * w_point;
+
+                // FIXME: Should this be bc_screen, or bc_clip?
+                let z = bc_screen.dot(Vec3(t0.2 as f32, t1.2 as f32, t2.2 as f32));
                 if self.zbuf[(x as usize, y as usize)] < z {
-                    let vert = Vertex::interpolate(bc_screen, &v0, &v1, &v2);
+                    let vert = Vertex::interpolate(bc_clip, &v0, &v1, &v2);
                     self.zbuf[(x as usize, y as usize)] = z;
                     self.color[(x as usize, y as usize)] = shader.fragment(vert, uniform);
                 }
