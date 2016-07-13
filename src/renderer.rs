@@ -12,7 +12,7 @@ impl Renderer {
     pub fn with_dimensions(w: usize, h: usize) -> Self {
         Renderer {
             color: Image::with_dimensions(w, h),
-            zbuf: Image::filled(w, h, 0.0),
+            zbuf: Image::filled(w, h, ::std::f32::MIN),
         }
     }
 
