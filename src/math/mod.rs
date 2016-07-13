@@ -16,3 +16,11 @@ pub fn barycentric((t0, t1, t2): (Vec2<isize>, Vec2<isize>, Vec2<isize>),
         Vec3(1.0 - (u.0 + u.1)/u.2, u.1/u.2, u.0/u.2)
     }
 }
+
+pub fn saturate(x: f32) -> f32 {
+    match x {
+        _ if x < 0.0 => 0.0,
+        _ if x > 1.0 => 1.0,
+        x => x,
+    }
+}

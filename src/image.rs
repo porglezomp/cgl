@@ -1,6 +1,6 @@
-use math::{Vec2, Vec3, barycentric};
+use math::{Vec2, Vec3, barycentric, saturate};
 
-use std::ops::{Index, IndexMut};
+use std::ops::{Add, Mul, Index, IndexMut};
 use std;
 
 /// A type representing a BGR triple
@@ -34,6 +34,39 @@ impl Color {
             }
         }
         Color::rgb(map(r), map(g), map(b))
+    }
+}
+
+impl Add for Color {
+    type Output = Self;
+    fn add(self, other: Color) -> Color {
+        Color::rgb(self.r + other.r, self.g + other.g, self.b + other.b)
+    }
+}
+
+impl Mul<f32> for Color {
+    type Output = Self;
+    fn mul(self, other: f32) -> Color {
+        fn clamp(val: f32) -> u8 {
+            match val {
+                _ if val < 0.0 => 0,
+                _ if val > 255.0 => 255,
+                val => val as u8,
+            }
+        }
+        Color::rgb(clamp(self.r as f32 * other),
+                   clamp(self.g as f32 * other),
+                   clamp(self.b as f32 * other))
+    }
+}
+
+impl Mul<u8> for Color {
+    type Output = Self;
+    fn mul(self, other: u8) -> Color {
+        let r = ((self.r as u16 * other as u16) >> 8) as u8;
+        let g = ((self.g as u16 * other as u16) >> 8) as u8;
+        let b = ((self.b as u16 * other as u16) >> 8) as u8;
+        Color::rgb(r, g, b)
     }
 }
 
@@ -191,6 +224,24 @@ impl<Pix> Image<Pix>
                 }
             }
         }
+    }
+}
+
+impl<Pix> Image<Pix> where Pix: Mul<f32, Output=Pix> + Add<Output=Pix> + Copy {
+    pub fn sample_clamp(&self, u: f32, v: f32) -> Pix {
+        let u = saturate(u);
+        let v = 1.0 - saturate(v);
+        let x = u * (self.width - 1) as f32;
+        let x0 = x.floor() as usize;
+        let x1 = x.ceil() as usize;
+        let x = x.fract();
+        let y = v * (self.height - 1) as f32;
+        let y0 = y.floor() as usize;
+        let y1 = y.ceil() as usize;
+        let y = y.fract();
+        let top = self[(x0, y0)] * x + self[(x1, y0)] * (1.0 - x);
+        let bot = self[(x0, y1)] * x + self[(x1, y1)] * (1.0 - x);
+        top * y + bot * (1.0 - y)
     }
 }
 

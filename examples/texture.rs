@@ -52,9 +52,12 @@ impl Shader<Vert, (Mat4<f32>, Image<Color>)> for TexturedDiffuse {
         vertex
     }
 
-    fn fragment(&self, input: Vert, &(_, _): &(Mat4<f32>, Image<Color>))
+    fn fragment(&self, input: Vert, &(_, ref texture): &(Mat4<f32>, Image<Color>))
                 -> Color
     {
-        Color::float_rgb(input.tex.0, input.tex.1, 0.0)
+        let light = input.norm.normalized()
+            .dot(Vec3(0.2f32, 1.0, 0.4).normalized());
+        let albedo = texture.sample_clamp(input.tex.0, input.tex.1);
+        albedo * light
     }
 }
