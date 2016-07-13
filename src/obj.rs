@@ -117,12 +117,14 @@ impl Obj {
         })
     }
 
-    pub fn model(&self) -> Result<Model<Vert>, ()> {
+    pub fn model(&self) -> Result<Model<Vert>, String> {
         let mut unique_vert = HashMap::new();
         let mut vertices = Vec::new();
         let mut triangles = Vec::with_capacity(self.triangles.len());
         for face in &self.components {
-            if face.len() > 3 { return Err(()); }
+            if face.len() > 3 {
+                return Err(format!("{} components, expected 3", face.len()));
+            }
             for index_set in face {
                 if !unique_vert.contains_key(index_set) {
                     let vert = Vert {

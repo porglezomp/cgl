@@ -78,6 +78,18 @@ impl Mul<u8> for Color {
     }
 }
 
+impl Mul for Color {
+    type Output = Self;
+    /// When multiplying two colors, we treat the components as if they were
+    /// fixed point 0.8 numbers, so 255 * 255 is 255, 128 * 128 is 64, etc.
+    fn mul(self, other: Self) -> Color {
+        let r = ((self.r as u16 * other.r as u16) >> 8) as u8;
+        let g = ((self.g as u16 * other.g as u16) >> 8) as u8;
+        let b = ((self.b as u16 * other.b as u16) >> 8) as u8;
+        Color::rgb(r, g, b)
+    }
+}
+
 /// A mutable buffer for storing and editing pixel data
 #[derive(Clone)]
 #[allow(missing_docs)]

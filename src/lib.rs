@@ -12,34 +12,54 @@
 //!
 //! # Priorities
 //!
-//! 1. *Clean code:* I want this to be a project that I can look back on in a few
-//!    years and still be able to understand. It would be even better if other
-//!    people could understand it as well!
-//! 2. *No Dependencies:* I don't want to use other people's vector graphics or
-//!    image loading libraries. I'm going to be stubborn and do it all myself.
+//! - *Clean code:* I want this to be a project that I can look back on in a few
+//!   years and still be able to understand. It would be even better if other
+//!   people could understand it as well!
+//! - *No Dependencies:* I don't want to use other people's vector graphics or
+//!   image loading libraries. I'm going to be stubborn and do it all myself.
 //!
 //! Some things that are non-priorities:
 //!
-//! 1. *Performance:* If you want performance, go look at hardware accelerated
-//!    rendering.
-//! 2. *Handling file formats robustly:* The only features of .obj or .bmp that I
-//!    will make an effort to support are features that I actually end up using
-//!    in my demos.
+//! - *Performance:* If you want performance, go look at hardware accelerated
+//!   rendering.
+//! - *Handling file formats robustly:* The only features of .obj or .bmp that I
+//!   will make an effort to support are features that I actually end up using
+//!   in my demos.
 //!
 //! # Examples
 //!
-//! The [`obj`] module lets you load models for rendering use
-//!
 //! ```rust,no_run
+//! use self::cgl::{Color, Renderer, Obj, Shader, Vert, Vec3, Vec4, Mat4, write_bmp};
 //! use std::fs::File;
-//! use std::io::BufReader;
-//! use self::cgl::Obj;
 //!
-//! let model_file = File::open("suzanne.obj").unwrap();
-//! let model = Obj::from_reader(BufReader::new(model_file)).unwrap();
+//! # fn load() -> Result<(), Box<::std::error::Error>> {
+//! let model = try!(try!(Obj::from_file("suzanne.obj")).model());
+//! let mut renderer = Renderer::with_dimensions(512, 512);
+//! let matrix = Mat4::viewport(512, 512) * Mat4::perspective(1.0);
+//!
+//! renderer.model(&MyShader, &matrix, &model);
+//!
+//! let mut out_file = try!(File::create("suzanne.bmp"));
+//! try!(write_bmp(renderer.image(), &mut out_file));
+//! # Ok(()) }
+//!
+//! struct MyShader;
+//!
+//! impl Shader<Vert, Mat4<f32>> for MyShader {
+//!     type VOut = Vert;
+//!
+//!     fn vertex(&self, vert: Vert, mat: &Mat4<f32>, pos: &mut Vec4<f32>) -> Vert {
+//!         *pos = *mat * vert.pos.augment();
+//!         vert
+//!     }
+//!
+//!     fn fragment(&self, vert: Vert, _: &Mat4<f32>) -> Color {
+//!         let c = Vec3(0.0f32, 1.0, 0.5).normalized()
+//!             .dot(vert.norm.normalized());
+//!         Color::rgb(200, 180, 140) * Color::float_rgb(c, c, c)
+//!     }
+//! }
 //! ```
-//!
-//! [`obj`]: obj/index.html
 
 pub mod obj;
 pub mod model;
