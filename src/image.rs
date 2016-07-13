@@ -1,10 +1,15 @@
+#![deny(missing_docs)]
+
+//! Data structures for representing images
+
 use math::{Vec2, Vec3, barycentric, saturate};
 
 use std::ops::{Add, Mul, Index, IndexMut};
 use std;
 
-/// A type representing a BGR triple
+/// A type representing a 24 bit pixel
 #[derive(Debug, Default, PartialEq, Eq, Clone, Copy)]
+#[allow(missing_docs)]
 pub struct Color {
     pub b: u8,
     pub g: u8,
@@ -25,6 +30,7 @@ impl Color {
     /// Somewhere between the color of the ocean and the sky
     pub fn blue()  -> Self { Color::rgb(0, 0, 255) }
 
+    /// Construct a color using floats in the range [0, 1] instead of bytes
     pub fn float_rgb(r: f32, g: f32, b: f32) -> Self {
         fn map(col: f32) -> u8 {
             match col {
@@ -62,6 +68,8 @@ impl Mul<f32> for Color {
 
 impl Mul<u8> for Color {
     type Output = Self;
+    /// When multiplying two colors, we treat the components as if they were
+    /// fixed point 0.8 numbers, so 255 * 255 is 255, 128 * 128 is 64, etc.
     fn mul(self, other: u8) -> Color {
         let r = ((self.r as u16 * other as u16) >> 8) as u8;
         let g = ((self.g as u16 * other as u16) >> 8) as u8;
@@ -70,17 +78,16 @@ impl Mul<u8> for Color {
     }
 }
 
-/// Stores an image on the heap for drawing into
+/// A mutable buffer for storing and editing pixel data
 #[derive(Clone)]
+#[allow(missing_docs)]
 pub struct Image<Pix> {
     pixels: Box<[Pix]>,
     pub width: usize,
     pub height: usize,
 }
 
-impl<Pix> Image<Pix>
-    where Pix: Clone + Copy + Default
-{
+impl<Pix> Image<Pix> where Pix: Clone + Copy + Default {
     /// Creates a new `width` by `height` `Image` filled with the default value
     /// for `Pix`. This function is equivalent to calling `Image::filled(width,
     /// height, Default::default())`.
@@ -137,6 +144,8 @@ impl<Pix> Image<Pix>
     }
 
     /// Draw a line into the image using Bresenham's Line Drawing Algorithm
+    ///
+    /// All the coordinates are pixel coordinates
     pub fn line(&mut self, mut x0: isize, mut y0: isize,
                 mut x1: isize, mut y1: isize, color: Pix)
     {
@@ -173,6 +182,9 @@ impl<Pix> Image<Pix>
         }
     }
 
+    /// Draw a triangle onto the image.
+    ///
+    /// `t0`, `t1`, and `t2` are points in pixel coordinates.
     pub fn triangle(&mut self, t0: Vec2<isize>, t1: Vec2<isize>,
                     t2: Vec2<isize>, color: Pix)
     {
@@ -192,18 +204,23 @@ impl<Pix> Image<Pix>
         }
     }
 
+    /// Draw a triangle into the image, taking into account a depth buffer.
+    ///
+    /// `t0`, `t1`, and `t2` are points in clip-space coordinates, which means
+    /// the center of the screen is (0, 0), the left and bottom sides are
+    /// negative, and the right and top sides are positive.
     pub fn triangle3(&mut self, t0: Vec3<f32>, t1: Vec3<f32>, t2: Vec3<f32>,
                      zbuf: &mut Image<f32>, color: Pix)
     {
         assert_eq!((self.width, self.height), (zbuf.width, zbuf.height));
-        fn world2screen<T>(image: &Image<T>, x: Vec3<f32>) -> Vec2<isize> {
+        fn clip2screen<T>(image: &Image<T>, x: Vec3<f32>) -> Vec2<isize> {
             Vec2(((x.0 + 1.0) * 0.5 * image.width as f32) as isize,
                  ((-x.1 + 1.0) * 0.5 * image.height as f32) as isize)
         }
 
-        let s0 = world2screen(self, t0);
-        let s1 = world2screen(self, t1);
-        let s2 = world2screen(self, t2);
+        let s0 = clip2screen(self, t0);
+        let s1 = clip2screen(self, t1);
+        let s2 = clip2screen(self, t2);
 
         use std::cmp::{min, max};
         let x0 = max(0, min(min(s0.0, min(s1.0, s2.0)), (self.width - 1) as isize));
@@ -228,6 +245,12 @@ impl<Pix> Image<Pix>
 }
 
 impl<Pix> Image<Pix> where Pix: Mul<f32, Output=Pix> + Add<Output=Pix> + Copy {
+    /// Sample the image at a point in UV space.
+    ///
+    /// The coordinates are [0, 1]x[0, 1], with (0, 0) at the lower left corner
+    /// and (1, 1) at the upper right corner. Points outside this range will be
+    /// sampled as if they were taken from the nearest point on the texture.
+    /// Samples are bilinearly interpolated.
     pub fn sample_clamp(&self, u: f32, v: f32) -> Pix {
         let u = saturate(u);
         let v = 1.0 - saturate(v);

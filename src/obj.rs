@@ -1,6 +1,15 @@
-//! For parsing and representing a model in the [wavefront obj] format.
+//! For parsing and representing a model in the [Wavefront .obj] format.
 //!
-//! [wavefront obj]: http://en.wikipedia.org/wiki/Wavefront_.obj_file
+//! [Wavefront .obj]: http://en.wikipedia.org/wiki/Wavefront_.obj_file
+//!
+//! The .obj format is a multi-indexed format, which means that a single vertex
+//! can have a different index for its position, texture, and normals. As such,
+//! it's slightly more annoying to work with directly while rendering, so in
+//! order to render models you should first convert them to a [`Model`] with the
+//! [`model()`] method.
+//!
+//! [`Model`]: ../model/struct.Model.html
+//! [`model()`]: struct.Obj.html#method.model
 
 use std::io::{self, BufRead, BufReader};
 use std::fmt::{self, Display, Formatter};
@@ -14,58 +23,6 @@ use std::num;
 use model::{Model, Vert};
 use math::{Vec2, Vec3, Mat4};
 
-#[derive(Debug)]
-pub enum Error {
-    Io(io::Error),
-    FloatParse(num::ParseFloatError),
-    IntParse(num::ParseIntError),
-    ObjParse(usize),
-}
-
-impl Display for Error {
-    fn fmt(&self, fmt: &mut Formatter) -> fmt::Result {
-        match *self {
-            Error::Io(ref err) => write!(fmt, "IO error: {}", err),
-            Error::FloatParse(ref err) => write!(fmt, "Float parse error: {}", err),
-            Error::IntParse(ref err) => write!(fmt, "Int parse error: {}", err),
-            Error::ObjParse(0) => write!(fmt, "OBJ parse error on unknown line"),
-            Error::ObjParse(n) => write!(fmt, "OBJ parse error on line {}", n),
-        }
-    }
-}
-
-impl error::Error for Error {
-    fn description(&self) -> &str {
-        match *self {
-            Error::Io(ref err) => err.description(),
-            Error::FloatParse(ref err) => err.description(),
-            Error::IntParse(ref err) => err.description(),
-            Error::ObjParse(_) => "Error parsing OBJ file",
-        }
-    }
-
-    fn cause(&self) -> Option<&error::Error> {
-        match *self {
-            Error::Io(ref err) => Some(err),
-            Error::FloatParse(ref err) => Some(err),
-            Error::IntParse(ref err) => Some(err),
-            Error::ObjParse(_) => None,
-        }
-    }
-}
-
-impl From<io::Error> for Error {
-    fn from(error: io::Error) -> Self { Error::Io(error) }
-}
-
-impl From<num::ParseFloatError> for Error {
-    fn from(error: num::ParseFloatError) -> Self { Error::FloatParse(error) }
-}
-
-impl From<num::ParseIntError> for Error {
-    fn from(error: num::ParseIntError) -> Self { Error::IntParse(error) }
-}
-
 pub type Vertex = Vec3<f32>;
 pub type Normal = Vec3<f32>;
 pub type TexCoord = Vec2<f32>;
@@ -78,6 +35,7 @@ pub struct VertexIndex {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+/// Represents a Wavefront .obj model.
 pub struct Obj {
     pub vertices: Vec<Vertex>,
     pub normals: Vec<Normal>,
@@ -373,4 +331,56 @@ v 1.0 1.0 1.0");
         let index = normalize_indices(zero_index, 0, 0, 0);
         assert!(index.is_err(), "A zero index is invalid");
     }
+}
+
+#[derive(Debug)]
+pub enum Error {
+    Io(io::Error),
+    FloatParse(num::ParseFloatError),
+    IntParse(num::ParseIntError),
+    ObjParse(usize),
+}
+
+impl Display for Error {
+    fn fmt(&self, fmt: &mut Formatter) -> fmt::Result {
+        match *self {
+            Error::Io(ref err) => write!(fmt, "IO error: {}", err),
+            Error::FloatParse(ref err) => write!(fmt, "Float parse error: {}", err),
+            Error::IntParse(ref err) => write!(fmt, "Int parse error: {}", err),
+            Error::ObjParse(0) => write!(fmt, "OBJ parse error on unknown line"),
+            Error::ObjParse(n) => write!(fmt, "OBJ parse error on line {}", n),
+        }
+    }
+}
+
+impl error::Error for Error {
+    fn description(&self) -> &str {
+        match *self {
+            Error::Io(ref err) => err.description(),
+            Error::FloatParse(ref err) => err.description(),
+            Error::IntParse(ref err) => err.description(),
+            Error::ObjParse(_) => "Error parsing OBJ file",
+        }
+    }
+
+    fn cause(&self) -> Option<&error::Error> {
+        match *self {
+            Error::Io(ref err) => Some(err),
+            Error::FloatParse(ref err) => Some(err),
+            Error::IntParse(ref err) => Some(err),
+            Error::ObjParse(_) => None,
+        }
+    }
+}
+
+impl From<io::Error> for Error {
+    fn from(error: io::Error) -> Self { Error::Io(error) }
+}
+
+impl From<num::ParseFloatError> for Error {
+    fn from(error: num::ParseFloatError) -> Self { Error::FloatParse(error) }
+}
+
+impl From<num::ParseIntError> for Error {
+    fn from(error: num::ParseIntError) -> Self { Error::IntParse(error) }
 }
