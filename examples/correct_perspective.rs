@@ -1,9 +1,8 @@
 extern crate cgl;
 
-use std::fs::File;
+use cgl::{Color, Renderer, Shader, Vert, Model, Mat4, Vec2, Vec3, Vec4};
 
-use cgl::{Color, Renderer, write_bmp};
-use cgl::{Shader, Vert, Model, Mat4, Vec2, Vec3, Vec4};
+mod demo;
 
 fn main() {
     let model = Model {
@@ -36,25 +35,12 @@ fn main() {
     };
 
     let mut renderer = Renderer::with_dimensions(512, 512);
-
-    let matrix = {
-        let viewport = Mat4::viewport(512, 512);
-        let perspective = Mat4::perspective(5.0);
-        let model = Mat4::identity();
-        let view = Mat4::lookat(Vec3(0.0, 0.0, 0.0),
-                                Vec3(0.3, 0.5, 0.5),
-                                Vec3(0.0, 1.0, 0.0));
-        viewport * perspective * view * model
-    };
-
+    let matrix = demo::african_head_matrix();
     let shader = Checkerboard;
 
     renderer.model(&shader, &matrix, &model);
 
-    let mut out_file = File::create("demo/demo10.bmp")
-        .expect("Should create file demo/demo10.bmp");
-    write_bmp(&renderer.image(), &mut out_file)
-        .expect("Should save file");
+    demo::save(renderer.image(), 10);
 }
 
 struct Checkerboard;

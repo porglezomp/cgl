@@ -1,16 +1,11 @@
 extern crate cgl;
 
-use cgl::{Image, Color, Obj, Vec3, write_bmp};
+use cgl::{Image, Color, Vec3};
 
-use std::io::BufReader;
-use std::fs::File;
+mod demo;
 
 fn main() {
-    let model_file = File::open("assets/african_head/african_head.obj")
-        .expect("Should open assets/african_head/african_head.obj");
-    let model = Obj::from_reader(BufReader::new(model_file))
-        .expect("Should parse the model");
-
+    let model = demo::african_head_obj();
     let mut image = Image::with_dimensions(512, 512);
     let mut zbuf = Image::filled(512, 512, std::f32::MIN);
 
@@ -27,8 +22,5 @@ fn main() {
                         Color::float_rgb(shade*1.2, shade, shade*0.8));
     }
 
-    let mut out_file = File::create("demo/demo4.bmp")
-        .expect("Should create demo/demo4.bmp");
-    write_bmp(&image, &mut out_file)
-        .expect("Should write the output image");
+    demo::save(&image, 4);
 }

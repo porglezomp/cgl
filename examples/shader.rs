@@ -1,44 +1,28 @@
 extern crate cgl;
 
-use cgl::{Color, Mat4, Obj, Renderer, Shader, Vec3, Vec4, Vert, write_bmp};
-use std::fs::File;
+use cgl::{Color, Mat4, Renderer, Shader, Vec3, Vec4, Vert};
+
+mod demo;
 
 fn main() {
-    let model = Obj::from_file("assets/african_head/african_head.obj")
-        .expect("Should parse assets/african_head/african_head.obj")
-        .model()
-        .expect("Should convert correctly");
-
+    let model = demo::african_head();
     let mut renderer = Renderer::with_dimensions(512, 512);
+    let matrix = demo::african_head_matrix();
+    let shader = DiffuseShader;
 
-    let matrix = {
-        let viewport = Mat4::viewport(512, 512);
-        let perspective = Mat4::perspective(1.0);
-        let model = Mat4::identity();
-        let view = Mat4::lookat(Vec3(0.0, 0.0, 0.0),
-                                Vec3(0.3, 0.2, 0.5),
-                                Vec3(0.0, 1.0, 0.0));
-        viewport * perspective * view * model
-    };
-
-    let shader = DiffuseShader::default();
     renderer.model(&shader, &matrix, &model);
 
-    let mut out_file = File::create("demo/demo7.bmp")
-        .expect("Should create file demo/demo7.bmp");
-    write_bmp(renderer.image(), &mut out_file)
-        .expect("Should save image");
+    demo::save(renderer.image(), 7);
 }
 
-#[derive(Default)]
 struct DiffuseShader;
 
 impl Shader<Vert, Mat4<f32>> for DiffuseShader {
     type VOut = Vert;
 
-    fn vertex(&self, vertex: Vert, uniform: &Mat4<f32>, pos: &mut Vec4<f32>) -> Vert {
-        *pos = *uniform * vertex.pos.augment();
-        vertex
+    fn vertex(&self, vert: Vert, mat: &Mat4<f32>, pos: &mut Vec4<f32>) -> Vert {
+        *pos = *mat * vert.pos.augment();
+        vert
     }
 
     fn fragment(&self, input: Vert, _uniform: &Mat4<f32>) -> Color {

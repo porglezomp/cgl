@@ -1,15 +1,11 @@
 extern crate cgl;
 
-use cgl::{Color, Obj, Mat4, Renderer, Vec3, write_bmp};
+use cgl::{Color, Renderer, Mat4, Vec3};
 
-use std::fs::File;
-use std::io::BufReader;
+mod demo;
 
 fn main() {
-    let model_file = File::open("assets/african_head/african_head.obj")
-        .expect("Should open assets/african_head/african_head.obj");
-    let model = Obj::from_reader(BufReader::new(model_file))
-        .expect("Should parse model");
+    let model = demo::african_head_obj();
 
     let mut renderer = Renderer::with_dimensions(512, 512);
 
@@ -24,6 +20,7 @@ fn main() {
     };
 
     let (transformed, tris) = model.transform(matrix);
+
     for tri in tris {
         let t0 = transformed[tri[0] as usize];
         let t1 = transformed[tri[1] as usize];
@@ -38,8 +35,5 @@ fn main() {
         renderer.triangle(t0, t1, t2, Color::float_rgb(c * 1.2, c, c * 0.8));
     }
 
-    let mut out_file = File::create("demo/demo6.bmp")
-        .expect("Should create demo/demo6.bmp");
-    write_bmp(renderer.image(), &mut out_file)
-        .expect("Should save image");
+    demo::save(renderer.image(), 6);
 }

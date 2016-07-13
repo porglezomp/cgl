@@ -1,8 +1,8 @@
 extern crate cgl;
 
-use cgl::{Image, Color, Vec3, write_bmp};
+use cgl::{Image, Color, Vec3};
 
-use std::fs::File;
+mod demo;
 
 fn main() {
     // Create a black image and a z-buffer
@@ -24,8 +24,5 @@ fn main() {
                     Vec3(-0.5, -0.7, 0.4), &mut zbuf, Color::green());
 
     // Save the image to an output file
-    let mut output = File::create("demo/demo3.bmp")
-        .expect("Should create demo3.bmp");
-    write_bmp(&image, &mut output)
-        .expect("Should save image");
+    demo::save(&image, 3);
 }
