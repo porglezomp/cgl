@@ -1,8 +1,9 @@
 use super::{Image, Color};
 
-use std::io::{self, Read, Write};
+use std::io::{self, Read, Write, Seek};
 
 const FULL_HEADER_SIZE: usize = 54;
+const IMAGE_OFFSET: usize = FULL_HEADER_SIZE;
 const DATA_HEADER_SIZE: usize = 40;
 const BPP: i16 = 24;
 const PIXELS_PER_METER: usize = 2835;
@@ -16,7 +17,7 @@ pub fn write_bmp<W: Write>(image: &Image<Color>, writer: &mut W)
     try!(writer.write(b"BM"));
     try!(writer.write(&le32(image_size as i32)));
     try!(writer.write(&[0, 0, 0, 0])); // Reserved
-    try!(writer.write(&le32(FULL_HEADER_SIZE as i32)));
+    try!(writer.write(&le32(IMAGE_OFFSET as i32)));
     try!(writer.write(&le32(DATA_HEADER_SIZE as i32)));
     try!(writer.write(&le32(image.width as i32)));
     try!(writer.write(&le32(image.height as i32)));
@@ -36,27 +37,32 @@ pub fn write_bmp<W: Write>(image: &Image<Color>, writer: &mut W)
     Ok(image_size)
 }
 
-pub fn read_bmp<R: Read>(reader: &mut R) -> io::Result<Image<Color>> {
+pub fn read_bmp<R: Read + Seek>(reader: &mut R) -> io::Result<Image<Color>> {
     let mut header = [0; FULL_HEADER_SIZE];
     try!(reader.read_exact(&mut header));
     if &header[..2] != b"BM" {
         return Err(io::Error::new(io::ErrorKind::Other,
                                   "The magic number should be BM"));
     }
-    let width = read_le32(&header[18..22]) as usize;
-    let (height, inverted) = {
-        let height = read_le32(&header[22..26]);
-        (height.abs() as usize, height < 0)
-    };
     let bpp = read_le16(&header[28..30]);
     if bpp != BPP {
         return Err(io::Error::new(io::ErrorKind::Other,
                                   "Only 24 BPP is supported"));
     }
+
+    let width = read_le32(&header[18..22]) as usize;
+    let (height, inverted) = {
+        let height = read_le32(&header[22..26]);
+        (height.abs() as usize, height < 0)
+    };
+    let image_offset = read_le32(&header[10..14]) as usize;
+    try!(reader.seek(io::SeekFrom::Start(image_offset as u64)));
+
     let row_width = (width * 3 + 3) & !3;
     let mut image_buf = vec![0; row_width * height];
-    try!(reader.read_exact(&mut image_buf));
+    try!(reader.read_exact(&mut image_buf[..]));
     let mut image = Image::with_dimensions(width, height);
+
     if inverted {
         for (source, mut dest) in image_buf.chunks(row_width)
                 .zip(image.bytes_mut().chunks_mut(width * 3)) {
