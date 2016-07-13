@@ -120,10 +120,16 @@ macro_rules! vector_op {
 
 vector_op!(Vec2: Add (add) (+) { 0, 1 });
 vector_op!(Vec2: Sub (sub) (-) { 0, 1 });
+vector_op!(Vec2: Mul (mul) (*) { 0, 1 });
+vector_op!(Vec2: Div (div) (/) { 0, 1 });
 vector_op!(Vec3: Add (add) (+) { 0, 1, 2 });
 vector_op!(Vec3: Sub (sub) (-) { 0, 1, 2 });
+vector_op!(Vec3: Mul (mul) (*) { 0, 1, 2 });
+vector_op!(Vec3: Div (div) (/) { 0, 1, 2 });
 vector_op!(Vec4: Add (add) (+) { 0, 1, 2, 3 });
 vector_op!(Vec4: Sub (sub) (-) { 0, 1, 2, 3 });
+vector_op!(Vec4: Mul (mul) (*) { 0, 1, 2, 3 });
+vector_op!(Vec4: Div (div) (/) { 0, 1, 2, 3 });
 
 macro_rules! scalar_op {
     ($V:ident : $Trait:ident ($name:ident) ($op:tt) {$($part:tt),*}) => {
