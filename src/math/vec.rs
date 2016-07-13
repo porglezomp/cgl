@@ -3,13 +3,13 @@ use std::ops::{Index, IndexMut};
 
 // Type Definitions ////////////////////////////////////////////////////////////
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Default, PartialEq, Clone, Copy)]
 pub struct Vec2<T: Clone+Copy>(pub T, pub T);
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Default, PartialEq, Clone, Copy)]
 pub struct Vec3<T: Clone+Copy>(pub T, pub T, pub T);
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Default, PartialEq, Clone, Copy)]
 pub struct Vec4<T: Clone+Copy>(pub T, pub T, pub T, pub T);
 
 // Indexing ////////////////////////////////////////////////////////////////////

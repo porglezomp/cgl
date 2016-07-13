@@ -1,6 +1,6 @@
 extern crate cgl;
 
-use cgl::{Color, Mat4, Obj, Renderer, Shader, Vec3, Vert, write_bmp};
+use cgl::{Color, Mat4, Obj, Renderer, Shader, Vec3, Vec4, Vert, write_bmp};
 use std::fs::File;
 
 fn main() {
@@ -36,17 +36,14 @@ struct DiffuseShader;
 impl Shader<Vert, Mat4<f32>> for DiffuseShader {
     type VOut = Vert;
 
-    fn vertex(&self, vertex: Vert, uniform: &Mat4<f32>) -> Vert {
-        Vert {
-            pos: (*uniform * vertex.pos.augment()).retro_project(),
-            tex: vertex.tex,
-            norm: vertex.norm,
-        }
+    fn vertex(&self, vertex: Vert, uniform: &Mat4<f32>, pos: &mut Vec4<f32>) -> Vert {
+        *pos = *uniform * vertex.pos.augment();
+        vertex
     }
 
     fn fragment(&self, input: Vert, _uniform: &Mat4<f32>) -> Color {
         let c = input.norm.normalized()
             .dot(Vec3(0.0f32, 1.0, 0.5).normalized());
-        Color::float_rgb(c, c, c)
+        Color::float_rgb(c * 1.2, c, c * 0.8)
     }
 }

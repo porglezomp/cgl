@@ -1,4 +1,4 @@
-use math::{Vec2, Vec3, barycentric};
+use math::{Vec2, Vec3, Vec4, barycentric};
 use image::{Image, Color};
 use shader::Shader;
 use model::{Model, Vertex};
@@ -48,18 +48,19 @@ impl Renderer {
     }
 
     pub fn tri<S, V, U>(&mut self, shader: &S, uniform: &U, t0: V, t1: V, t2: V)
-        where V: Vertex, S: Shader<V, U>
+        where V: Vertex + ::std::fmt::Debug, S: Shader<V, U>, <S as Shader<V, U>>::VOut: ::std::fmt::Debug
     {
-        let v0 = shader.vertex(t0, uniform);
-        let v1 = shader.vertex(t1, uniform);
-        let v2 = shader.vertex(t2, uniform);
-        macro_rules! as_isize { ($x:ident) => {{
-            let t = $x.pos();
-            Vec3(t.0 as isize, t.1 as isize, t.2 as isize)
-        }}}
-        let t0 = as_isize!(v0);
-        let t1 = as_isize!(v1);
-        let t2 = as_isize!(v2);
+        macro_rules! apply_vertex {
+            ($vin:ident => $t:ident $v:ident) => {
+                let mut t = Vec4::default();
+                let $v = shader.vertex($vin, uniform, &mut t);
+                let t0 = t.retro_project();
+                let $t = Vec3(t0.0 as isize, t0.1 as isize, t0.2 as isize);
+            }
+        }
+        apply_vertex!(t0 => t0 v0);
+        apply_vertex!(t1 => t1 v1);
+        apply_vertex!(t2 => t2 v2);
         let ((x0, y0), (x1, y1)) = self.clip(t0, t1, t2);
 
         for x in (x0..x1).chain(Some(x1)) {
@@ -70,9 +71,12 @@ impl Renderer {
                     continue;
                 }
 
-                let vert = <S::VOut as Vertex>::interpolate(bc_screen, &v0, &v1, &v2);
-                if self.zbuf[(x as usize, y as usize)] < vert.pos().2 {
-                    self.zbuf[(x as usize, y as usize)] = vert.pos().2;
+                let z = t0.2 as f32 * bc_screen.0 +
+                    t1.2 as f32 * bc_screen.1 +
+                    t2.2 as f32 * bc_screen.2;
+                if self.zbuf[(x as usize, y as usize)] < z {
+                    let vert = Vertex::interpolate(bc_screen, &v0, &v1, &v2);
+                    self.zbuf[(x as usize, y as usize)] = z;
                     self.color[(x as usize, y as usize)] = shader.fragment(vert, uniform);
                 }
             }
@@ -80,7 +84,7 @@ impl Renderer {
     }
 
     pub fn model<S, V, U>(&mut self, shader: &S, uniform: &U, model: &Model<V>)
-        where V: Vertex + Copy, S: Shader<V, U>
+        where V: Vertex + Copy + ::std::fmt::Debug, S: Shader<V, U>, S::VOut: ::std::fmt::Debug
     {
         for tri in &model.triangles {
             self.tri(shader, uniform,

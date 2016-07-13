@@ -1,7 +1,6 @@
 use math::{Vec2, Vec3};
 
 pub trait Vertex {
-    fn pos(&self) -> &Vec3<f32>;
     fn interpolate(x: Vec3<f32>, t0: &Self, t1: &Self, t2: &Self) -> Self;
 }
 
@@ -13,8 +12,6 @@ pub struct Vert {
 }
 
 impl Vertex for Vert {
-    fn pos(&self) -> &Vec3<f32> { &self.pos }
-
     fn interpolate(x: Vec3<f32>, t0: &Self, t1: &Self, t2: &Self) -> Self {
         Vert {
             pos: t0.pos * x.0 + t1.pos * x.1 + t2.pos * x.2,
@@ -31,8 +28,6 @@ pub struct Model<V: Vertex> {
 }
 
 impl Vertex for Vec3<f32> {
-    fn pos(&self) -> &Vec3<f32> { &self }
-
     fn interpolate(x: Vec3<f32>, t0: &Self, t1: &Self, t2: &Self) -> Self {
         *t0 * x.0 + *t1 * x.1 + *t2 * x.2
     }
