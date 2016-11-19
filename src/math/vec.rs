@@ -43,6 +43,22 @@ impl_indexing!(Vec2: 0, 1);
 impl_indexing!(Vec3: 0, 1, 2);
 impl_indexing!(Vec4: 0, 1, 2, 3);
 
+// Into Array //////////////////////////////////////////////////////////////////
+
+macro_rules! impl_into_array {
+    ($V:ident $n:expr ; $($x:tt),*) => {
+        impl<T> Into<[T; $n]> for $V<T> where T: Copy {
+            fn into(self) -> [T; $n] {
+                [$(expr!(self.$x)),*]
+            }
+        }
+    }
+}
+
+impl_into_array!(Vec2 2; 0, 1);
+impl_into_array!(Vec3 3; 0, 1, 2);
+impl_into_array!(Vec4 4; 0, 1, 2, 3);
+
 // Dot-product Etc. ////////////////////////////////////////////////////////////
 
 impl<T> Vec2<T>
