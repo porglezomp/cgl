@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub, Mul, Div};
+use std::ops::{Add, Sub, Mul, Div, Neg};
 use std::ops::{Index, IndexMut};
 
 // Type Definitions ////////////////////////////////////////////////////////////
@@ -146,6 +146,21 @@ vector_op!(Vec4: Add (add) (+) { 0, 1, 2, 3 });
 vector_op!(Vec4: Sub (sub) (-) { 0, 1, 2, 3 });
 vector_op!(Vec4: Mul (mul) (*) { 0, 1, 2, 3 });
 vector_op!(Vec4: Div (div) (/) { 0, 1, 2, 3 });
+
+macro_rules! impl_negate {
+    ($V:ident { $($x:tt),* }) => {
+        impl<T> Neg for $V<T> where T: Neg + Clone + Copy {
+            type Output = Self;
+            fn neg(self) -> Self {
+                $V($(expr!(self.$x)),*)
+            }
+        }
+    }
+}
+
+impl_negate!(Vec2 { 0, 1 });
+impl_negate!(Vec3 { 0, 1, 2 });
+impl_negate!(Vec4 { 0, 1, 2, 3 });
 
 macro_rules! scalar_op {
     ($V:ident : $Trait:ident ($name:ident) ($op:tt) {$($part:tt),*}) => {
