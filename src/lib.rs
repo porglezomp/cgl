@@ -70,7 +70,7 @@ pub mod renderer;
 pub mod shader;
 
 pub use obj::Obj;
-pub use model::{Model, Vertex, Vert};
+pub use model::{Model, Vertex, Vert, TanVert};
 pub use bmp::{read_bmp, write_bmp};
 pub use math::{Vec2, Vec3, Vec4, Mat2, Mat3, Mat4};
 pub use image::{Image, Color};

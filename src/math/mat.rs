@@ -334,6 +334,7 @@ macro_rules! impl_invert {
                         let entry = self[(other_row_idx, row_max_idx)];
                         let factor = -entry / pivot;
                         self.add_row(other_row_idx, row * factor);
+                        self[(other_row_idx, row_max_idx)] = 0.0;
                         id.add_row(other_row_idx, id_row * factor);
                     }
                 }
@@ -352,7 +353,7 @@ macro_rules! impl_invert {
                 for idx in 0..$n {
                     let factor = 1.0/self[(idx, idx)];
                     // Debug
-                    self.mul_row(idx, factor);
+                    // self.mul_row(idx, factor);
                     id.mul_row(idx, factor);
                 }
 
