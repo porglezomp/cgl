@@ -215,57 +215,65 @@ impl_row_ops!(Mat4, Vec4, 4; 0, 1, 2, 3);
 
 // Matrix Arithmetic ///////////////////////////////////////////////////////////
 
+macro_rules! impl_ops {
+    ($M:ident , $V:ident , $n:expr ; $($x:tt),* ) => {
+        impl Mul for $M<f32> {
+            type Output = $M<f32>;
 
-impl Mul for Mat4<f32> {
-    type Output = Mat4<f32>;
-
-    fn mul(self, other: Mat4<f32>) -> Self::Output {
-        let mut out = Mat4::identity();
-        for row in 0..4 {
-            for col in 0..4 {
-                out[(row, col)] = self.row(row).dot(other.col(col));
+            fn mul(self, other: $M<f32>) -> Self::Output {
+                let mut out = $M::identity();
+                for row in 0..$n {
+                    for col in 0..$n {
+                        out[(row, col)] = self.row(row).dot(other.col(col));
+                    }
+                }
+                out
             }
         }
-        out
-    }
-}
 
-impl<T> Mul<T> for Mat4<T> where T: MulAssign + Copy {
-    type Output = Mat4<T>;
+        impl<T> Mul<T> for $M<T> where T: MulAssign + Copy {
+            type Output = $M<T>;
 
-    fn mul(mut self, other: T) -> Self::Output {
-        for col in self.cols.iter_mut() {
-            for entry in col.iter_mut() {
-                *entry *= other;
+            fn mul(mut self, other: T) -> Self::Output {
+                for col in self.cols.iter_mut() {
+                    for entry in col.iter_mut() {
+                        *entry *= other;
+                    }
+                }
+                self
             }
         }
-        self
-    }
-}
 
-impl Mul<Vec4<f32>> for Mat4<f32> {
-    type Output = Vec4<f32>;
+        impl Mul<$V<f32>> for $M<f32> {
+            type Output = $V<f32>;
 
-    fn mul(self, other: Vec4<f32>) -> Self::Output {
-        Vec4(self.row(0).dot(other),
-             self.row(1).dot(other),
-             self.row(2).dot(other),
-             self.row(3).dot(other))
-    }
-}
-
-impl<T> Add for Mat4<T> where T: AddAssign + Copy {
-    type Output = Mat4<T>;
-
-    fn add(mut self, other: Mat4<T>) -> Self::Output {
-        for row in 0..4 {
-            for col in 0..4 {
-                self[(row, col)] += other[(row, col)]
+            fn mul(self, other: $V<f32>) -> Self::Output {
+                $V($(self.row($x).dot(other)),*)
+                    // self.row(0).dot(other),
+                    //  self.row(1).dot(other),
+                    //  self.row(2).dot(other),
+                    //  self.row(3).dot(other))
             }
         }
-        self
+
+        impl<T> Add for $M<T> where T: AddAssign + Copy {
+            type Output = $M<T>;
+
+            fn add(mut self, other: $M<T>) -> Self::Output {
+                for row in 0..$n {
+                    for col in 0..$n {
+                        self[(row, col)] += other[(row, col)]
+                    }
+                }
+                self
+            }
+        }
     }
 }
+
+impl_ops!(Mat2, Vec2, 2; 0, 1);
+impl_ops!(Mat3, Vec3, 3; 0, 1, 2);
+impl_ops!(Mat4, Vec4, 4; 0, 1, 2, 3);
 
 
 // Inversion ///////////////////////////////////////////////////////////////////
