@@ -1,7 +1,6 @@
 [package]
-name = "cgl"
+name = "cgl-math"
 version = "0.2.0"
 authors = ["Caleb Jones <code@calebjones.net>"]
 
 [dependencies]
-cgl-math = { path = "../math", version = "0.2" }

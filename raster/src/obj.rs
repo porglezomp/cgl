@@ -21,7 +21,7 @@ use std::error;
 use std::num;
 
 use model::{Model, Vert};
-use math::{Vec2, Vec3, Mat4};
+use cgl_math::{Vec2, Vec3, Mat4};
 
 pub type Vertex = Vec3<f32>;
 pub type Normal = Vec3<f32>;

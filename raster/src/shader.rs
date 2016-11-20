@@ -1,6 +1,6 @@
 use image::Color;
 use model::Vertex;
-use math::Vec4;
+use cgl_math::Vec4;
 
 pub trait Shader<V: Vertex, U> {
     type VOut: Vertex;

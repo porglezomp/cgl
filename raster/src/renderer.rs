@@ -1,4 +1,4 @@
-use math::{Vec2, Vec3, Vec4, barycentric};
+use cgl_math::{Vec2, Vec3, Vec4, barycentric};
 use image::{Image, Color};
 use shader::Shader;
 use model::{Model, Vertex};

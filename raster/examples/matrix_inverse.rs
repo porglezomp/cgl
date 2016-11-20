@@ -1,6 +1,6 @@
-extern crate cgl;
+extern crate cgl_math;
 
-use cgl::math::{Mat2, Mat4};
+use cgl_math::{Mat2, Mat4};
 
 fn main() {
     let mat = Mat4::new([[8.0, 4.0, 7.0, 2.0],

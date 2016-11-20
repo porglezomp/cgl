@@ -2,7 +2,7 @@
 
 //! Data structures for representing images
 
-use math::{Vec2, Vec3, barycentric, saturate};
+use cgl_math::{Vec2, Vec3, barycentric, saturate};
 
 use std::ops::{Add, Mul, Index, IndexMut};
 use std;
