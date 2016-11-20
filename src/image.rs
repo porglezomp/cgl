@@ -46,7 +46,9 @@ impl Color {
 impl Add for Color {
     type Output = Self;
     fn add(self, other: Color) -> Color {
-        Color::rgb(self.r + other.r, self.g + other.g, self.b + other.b)
+        Color::rgb(self.r.saturating_add(other.r),
+                   self.g.saturating_add(other.g),
+                   self.b.saturating_add(other.b))
     }
 }
 

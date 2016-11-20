@@ -17,6 +17,15 @@ pub fn african_head() -> Model<Vert> {
         .expect("Should convert obj to model")
 }
 
+pub fn diablo_model() -> Model<Vert> {
+    let model_file = File::open("assets/diablo/devilman.obj")
+        .expect("Should open assets/diablo/devilman.obj");
+    Obj::from_reader(BufReader::new(model_file))
+        .expect("Should parse obj")
+        .model()
+        .expect("Should convert obj to model")
+}
+
 pub fn african_head_matrix() -> Mat4<f32> {
     let viewport = Mat4::viewport(512, 512);
     let perspective = Mat4::perspective(1.0);
