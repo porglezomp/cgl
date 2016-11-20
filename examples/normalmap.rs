@@ -27,7 +27,7 @@ fn main() {
 
     renderer.model(&shader, &(matrix, texture, normals), &model);
 
-    demo::save(renderer.image(), 10);
+    demo::save(renderer.image(), 11);
 }
 
 struct TexturedGlobalNormal;

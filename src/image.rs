@@ -161,15 +161,17 @@ impl<Pix> Image<Pix> where Pix: Clone + Copy + Default {
     pub fn line(&mut self, mut x0: isize, mut y0: isize,
                 mut x1: isize, mut y1: isize, color: Pix)
     {
+        use std::mem::swap;
         let steep = (x0 - x1).abs() < (y0 - y1).abs();
         if steep {
-            std::mem::swap(&mut x0, &mut y0);
-            std::mem::swap(&mut x1, &mut y1);
+            swap(&mut x0, &mut y0);
+            swap(&mut x1, &mut y1);
         }
         if x0 > x1 {
-            std::mem::swap(&mut x0, &mut x1);
-            std::mem::swap(&mut y0, &mut y1);
+            swap(&mut x0, &mut x1);
+            swap(&mut y0, &mut y1);
         }
+
         let (x0, y0, x1, y1) = (x0, y0, x1, y1);
         let (dx, dy) = (x1 - x0, y1 - y0);
         let derror = dy.abs()*2;
